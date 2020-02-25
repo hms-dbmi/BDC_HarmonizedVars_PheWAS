@@ -4,9 +4,9 @@ import PicSureHpdsLib
 import PicSureClient
 
 
-def get_HPDS_connection(PICSURE_network_URL: str,
-                        resource_id: str,
-                        my_token: str):
+def get_HPDS_connection(my_token: str,
+                        PICSURE_network_URL: str = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
+                        resource_id: str = "02e23f52-f354-4e8b-992c-d37c8b9ba140"):
     client = PicSureClient.Client()
     connection = client.connect(PICSURE_network_URL, my_token)
     adapter = PicSureHpdsLib.Adapter(connection)
@@ -47,7 +47,7 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
         if to_require is not None:
             query.require().add(to_require)
         if to_anyof is not None:
-            query.anyof().add()
+            query.anyof().add(to_anyof)
         if to_filter is not None:
             for variable, filters in to_filter.items():
                 if isinstance(filters, dict):
@@ -100,6 +100,7 @@ if __name__ == '__main__':
     mask_count = variablesDict["observationCount"]
     varnames = variablesDict.loc[mask_cat & mask_count, "name"]
 
+    resource = get_HPDS_connection(token, PICSURE_network_URL, resource_id)
     df = query_runner(resource,
                       to_select=varnames,
                       to_require=varnames[2],

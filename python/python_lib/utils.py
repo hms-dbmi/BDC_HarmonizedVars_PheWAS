@@ -1,5 +1,19 @@
+from datetime import datetime
+
 import pandas as pd
 import numpy as np
+
+from python_lib.wrappers import query_runner
+
+
+def timer_decorator(function):
+    def wrapper_timer(*args, **kwargs):
+        then = datetime.now()
+        output = function(*args, **kwargs)
+        print("Elapsed time for function {0}: {1}".format(datetime.now() - then,
+             function))
+        return output
+    return wrapper_timer
 
 
 def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
@@ -21,7 +35,6 @@ def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
                 yield len(elem)
             else:
                 yield np.NaN
-        
     
     variablesDict = variablesDict.rename_axis("varName", axis=0).sort_index()
     multi_index = _varName_toMultiIndex(variablesDict.index)
@@ -72,3 +85,20 @@ def joining_variablesDict_onCol(variablesDict: pd.DataFrame,
     variablesDict_joined = variablesDict_joined.reset_index(drop=False)\
         .set_index(variablesDict_index_names)
     return variablesDict_joined
+
+
+@timer_decorator
+def get_one_study(study_name: str,
+                  studies_info: pd.DataFrame,
+                  consent_var: str,
+                  variablesDict: pd.DataFrame,
+                  resource,
+                  **kwargs) -> pd.DataFrame:
+    phs_list = studies_info.loc[study_name, "phs_list"]
+    selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
+    facts = query_runner(resource=resource,
+                         to_select=selected_var,
+                         to_filter={consent_var: phs_list},
+                         result_type="DataFrame",
+                         **kwargs)
+    return facts
