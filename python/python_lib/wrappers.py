@@ -73,6 +73,23 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
     return _run_query(query, result_type, **kwargs)
 
 
+def get_mock_df(resource=None):
+    from python_lib.utils import get_multiIndex_variablesDict
+    if resource is None:
+        with open("token.txt", "r") as f:
+            token = f.read()
+        resource = get_HPDS_connection(token)
+    study_name = "Genetic Epidemiology of COPD (COPDGene)"
+    phs_list = ['phs000179.c0', 'phs000179.c1']
+    plain_variablesDict = resource.dictionary().find("COPDGene").DataFrame()
+    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+    selected_var = variablesDict.loc[study_name, "varName"].values.tolist()[:-1:10]
+    facts = query_runner(resource=resource,
+                         to_anyof=selected_var,
+                         result_type="DataFrame")
+    return facts
+
+
 if __name__ == '__main__':
     import os
     import pandas as pd

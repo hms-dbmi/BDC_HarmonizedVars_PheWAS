@@ -5,7 +5,6 @@ import numpy as np
 
 from python_lib.utils import timer_decorator
 
-
 @timer_decorator
 def _is_not_number(s):
     try:
@@ -81,11 +80,11 @@ def get_study_variables_info(original_df: pd.DataFrame,
         "Nb total variables": nb_variables, 
         "Total number subjects": total_nb_subjects,
         "ID variables": original_df.shape[1] - filtered_df.shape[1],
-        "Non-ID variables": filtered_df.shape[1]
+        "Phenotypes variables": filtered_df.shape[1]
     }
     
-    
-    prop_non_null_values = filtered_df.notnull().sum().to_frame() / filtered_df.shape[0]
+    non_null_values = filtered_df.notnull().sum()
+    prop_non_null_values = non_null_values.to_frame() / filtered_df.shape[0]
     thresholds = {
         "nb var > 10% non-null values": 0.1, 
         "nb var > 25% non-null values": 0.25, 
@@ -93,10 +92,10 @@ def get_study_variables_info(original_df: pd.DataFrame,
         "nb var > 75% non-null values": 0.75,
         "nb var > 90% non-null values": 0.9
     }
-    dic_quantiles = {k: prop_non_null_values > threshold for k, threshold in thresholds.items()}
+    dic_quantiles = {k: prop_non_null_values.apply(lambda x: x > threshold).sum().values[0] for k, threshold in thresholds.items()}
     
-    mean_non_null = non_null_values.mean().round(0).values[0]
-    median_non_null = non_null_values.median().round(0).values[0]
+    mean_non_null = non_null_values.mean()
+    median_non_null = non_null_values.median()
     non_null = {**dic_quantiles, 
                "Mean non-null value count per variable": mean_non_null,
                "Median non-null value count per variable": median_non_null
