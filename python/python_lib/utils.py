@@ -88,13 +88,17 @@ def joining_variablesDict_onCol(variablesDict: pd.DataFrame,
 
 
 @timer_decorator
-def get_one_study(study_name: str,
+def get_one_study(resource, 
+                  phs: str,
                   studies_info: pd.DataFrame,
-                  consent_var: str,
-                  variablesDict: pd.DataFrame,
-                  resource,
+                  variablesDict: pd.DataFrame=None,
                   **kwargs) -> pd.DataFrame:
-    phs_list = studies_info.loc[study_name, "phs_list"]
+    if variablesDict is None:
+        plain_variablesDict = resource.dictionary().find().DataFrame()
+        variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+    consent_var = '\\_Consents\\Short Study Accession with Consent Code\\'
+    phs_list = studies_info.loc[phs, "phs_list"][0]
+    study_name = studies_info.loc[phs, "BDC_study_name"]
     selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
     facts = query_runner(resource=resource,
                          to_select=selected_var,
