@@ -97,7 +97,7 @@ def get_one_study(resource,
         plain_variablesDict = resource.dictionary().find().DataFrame()
         variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
     consent_var = '\\_Consents\\Short Study Accession with Consent Code\\'
-    phs_list = studies_info.loc[phs, "phs_list"][0]
+    phs_list = studies_info.loc[phs, "phs_list"]
     study_name = studies_info.loc[phs, "BDC_study_name"]
     selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
     facts = query_runner(resource=resource,

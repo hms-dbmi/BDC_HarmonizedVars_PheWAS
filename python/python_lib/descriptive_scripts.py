@@ -5,6 +5,7 @@ import numpy as np
 
 from python_lib.utils import timer_decorator
 
+
 @timer_decorator
 def _is_not_number(s):
     try:
@@ -15,7 +16,7 @@ def _is_not_number(s):
 
 
 @timer_decorator
-def quality_filtering(study_df: pd.DataFrame) -> np.array:
+def quality_checking(study_df: pd.DataFrame) -> np.array:
     """
     1. Assert that all numerical columns are really numericals
     2. Filter the input DataFrame regarding two criteria:
@@ -70,6 +71,15 @@ def inferring_categorical_columns(study_df: pd.DataFrame,
     potential_categorical = int_df.loc[:, unique_values.values <= threshold_categorical]\
         .columns
     return potential_categorical
+
+
+@timer_decorator
+def quality_filtering(study_df):
+    inferred_cat_columns = inferring_categorical_columns(study_df)
+    study_df[inferred_cat_columns] = study_df[inferred_cat_columns].astype(str)
+    variables_to_drop = quality_checking(study_df)
+    filtered_df = study_df.drop(variables_to_drop, axis=1)
+    return filtered_df
 
 
 @timer_decorator
