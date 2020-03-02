@@ -1,0 +1,33 @@
+getting original df
+ERROR: HTTP response was bad
+https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure/search/02e23f52-f354-4e8b-992c-d37c8b9ba140
+{'server': 'awselb/2.0', 'date': 'Mon, 02 Mar 2020 17:47:56 GMT', 'content-type': 'text/html', 'content-length': '148', 'connection': 'keep-alive', 'status': '504'}
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+</body>
+</html>
+
+ERROR: cannot add, key does not exist in resource ->  \Genetic Epidemiology of COPD (COPDGene)\Subject Phenotype\SF-36 Health Survey\SF-36 Body Pain (BP) t-score (normalized)\
+Elapsed time for function 0:02:37.153828: <function get_one_study at 0x7fb8fe815488>
+shape original_df: (10385, 342)
+Elapsed time for function 0:00:00.359439: <function inferring_categorical_columns at 0x7fb8fe8157b8>
+25 variables to drop after quality checking
+Elapsed time for function 0:00:01.318923: <function quality_checking at 0x7fb8fe8156a8>
+Elapsed time for function 0:00:01.723658: <function quality_filtering at 0x7fb8fe8158c8>
+shape filtered_df: (10385, 317)
+Elapsed time for function 0:00:00.079099: <function get_study_variables_info at 0x7fb8fe8159d8>
+{'Number variables with non-null values': {'Mean non-null value count per variable': 7550.009463722397,
+                                           'Median non-null value count per variable': 9910.0,
+                                           'nb var > 10% non-null values': 305,
+                                           'nb var > 25% non-null values': 273,
+                                           'nb var > 50% non-null values': 219,
+                                           'nb var > 75% non-null values': 204,
+                                           'nb var > 90% non-null values': 183},
+ 'Variable types': {dtype('int64'): 1, dtype('float64'): 138, dtype('O'): 178},
+ 'Variables count': {'ID variables': 25,
+                     'Nb total variables': 342,
+                     'Phenotypes variables': 317,
+                     'Total number subjects': 10385}}
+went through!

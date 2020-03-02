@@ -1,0 +1,22 @@
+getting original df
+Elapsed time for function 0:00:27.398886: <function get_one_study at 0x7f997747b488>
+shape original_df: (5473, 91)
+Elapsed time for function 0:00:00.070587: <function inferring_categorical_columns at 0x7f997747b7b8>
+18 variables to drop after quality checking
+Elapsed time for function 0:00:00.179242: <function quality_checking at 0x7f997747b6a8>
+Elapsed time for function 0:00:00.262118: <function quality_filtering at 0x7f997747b8c8>
+shape filtered_df: (5473, 73)
+Elapsed time for function 0:00:00.016571: <function get_study_variables_info at 0x7f997747b9d8>
+{'Number variables with non-null values': {'Mean non-null value count per variable': 1780.0821917808219,
+                                           'Median non-null value count per variable': 1876.0,
+                                           'nb var > 10% non-null values': 57,
+                                           'nb var > 25% non-null values': 41,
+                                           'nb var > 50% non-null values': 6,
+                                           'nb var > 75% non-null values': 6,
+                                           'nb var > 90% non-null values': 6},
+ 'Variable types': {dtype('int64'): 1, dtype('float64'): 52, dtype('O'): 20},
+ 'Variables count': {'ID variables': 18,
+                     'Nb total variables': 91,
+                     'Phenotypes variables': 73,
+                     'Total number subjects': 5473}}
+went through!

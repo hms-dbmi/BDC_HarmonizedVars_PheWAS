@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexes/base.py", line 2646, in get_loc
+    return self._engine.get_loc(key)
+  File "pandas/_libs/index.pyx", line 111, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 138, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1618, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1626, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'phs'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "studies_stats.py", line 31, in <module>
+    study_name = studies_info.loc[phs, "BDC_study_name"]
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexing.py", line 1761, in __getitem__
+    return self._getitem_tuple(key)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexing.py", line 1271, in _getitem_tuple
+    return self._getitem_lowerdim(tup)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexing.py", line 1388, in _getitem_lowerdim
+    section = self._getitem_axis(key, axis=i)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexing.py", line 1964, in _getitem_axis
+    return self._get_label(key, axis=axis)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexing.py", line 624, in _get_label
+    return self.obj._xs(label, axis=axis)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/generic.py", line 3537, in xs
+    loc = self.index.get_loc(key)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/pandas/core/indexes/base.py", line 2648, in get_loc
+    return self._engine.get_loc(self._maybe_cast_indexer(key))
+  File "pandas/_libs/index.pyx", line 111, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 138, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1618, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 1626, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'phs'
