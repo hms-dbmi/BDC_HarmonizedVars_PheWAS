@@ -117,11 +117,6 @@ def get_study_variables_info(original_df: pd.DataFrame,
         "Number variables with non-null values": non_null,
         "Variable types": var_dtypes
     }
-#    thresholds = (total_nb_subject*0.25, total_nb_subject*0.5, total_nb_subject*0.75)
-#    dic_non_null_dummies = {threshold: np.sum(non_null_values > threshold) for threshold in thresholds}
-#    df_non_null_dummies = pd.DataFrame.from_dict(dic_non_null_dummies, orient="index")\
-#    .rename_axis("thresholds", axis=0)\
-#    .rename({0: "nb_variables"}, axis=1)    
     return long_dictionary
 
 
