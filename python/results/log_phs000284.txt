@@ -1,0 +1,36 @@
+getting original df
+ERROR: HTTP response was bad
+https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure/search/02e23f52-f354-4e8b-992c-d37c8b9ba140
+{'server': 'awselb/2.0', 'date': 'Mon, 02 Mar 2020 17:47:41 GMT', 'content-type': 'text/html', 'content-length': '148', 'connection': 'keep-alive', 'status': '504'}
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+</body>
+</html>
+
+ERROR: cannot add, key does not exist in resource ->  \NHLBI Cleveland Family Study (CFS) Candidate Gene Association Resource (CARe)\CFS - Phenotype Data\FAMILY15_LAD_LONG_Data\Baseline Questionnaires\CFS - Adult Questionnaire (A)\Medical History (A)\Sleep Associated Behavior - (A)\Family (A)\Struggle for breath while asleep (A)\
+ERROR: HTTP response was bad
+https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure/query/sync
+{'server': 'awselb/2.0', 'date': 'Mon, 02 Mar 2020 18:01:35 GMT', 'content-type': 'text/html', 'content-length': '148', 'connection': 'keep-alive', 'status': '504'}
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body bgcolor="white">
+<center><h1>504 Gateway Time-out</h1></center>
+</body>
+</html>
+
+Traceback (most recent call last):
+  File "studies_stats.py", line 36, in <module>
+    original_df = get_one_study(resource, phs, studies_info, variablesDict, low_memory=False)
+  File "/home/ubuntu/git_repos/PheWAS/python/python_lib/utils.py", line 12, in wrapper_timer
+    output = function(*args, **kwargs)
+  File "/home/ubuntu/git_repos/PheWAS/python/python_lib/utils.py", line 107, in get_one_study
+    **kwargs)
+  File "/home/ubuntu/git_repos/PheWAS/python/python_lib/wrappers.py", line 73, in query_runner
+    return _run_query(query, result_type, **kwargs)
+  File "/home/ubuntu/git_repos/PheWAS/python/python_lib/wrappers.py", line 61, in _run_query
+    return query.getResultsDataFrame(**kwargs)
+  File "/home/ubuntu/miniconda3/envs/PheWAS_env/lib/python3.6/site-packages/PicSureHpdsLib/PicSureHpdsQuery.py", line 236, in getResultsDataFrame
+    if result.error == True:
+AttributeError: 'dict' object has no attribute 'error'
