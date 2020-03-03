@@ -59,7 +59,7 @@ def inferring_categorical_columns(study_df: pd.DataFrame,
     - 
     :param study_df:
     :param threshold_categorical:
-    :return:
+    :return:g
     """
     float_df = study_df.loc[:, study_df.dtypes == "float"]
     int_columns = study_df.loc[:, study_df.dtypes == "int"].columns.tolist()

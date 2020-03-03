@@ -6,8 +6,8 @@ import json
 
 import pandas as pd
 
-from python_lib.wrappers import get_HPDS_connection
-from python_lib.utils import get_multiIndex_variablesDict, get_one_study
+from python_lib.wrappers import get_HPDS_connection, get_one_study
+from python_lib.utils import get_multiIndex_variablesDict
 from python_lib.descriptive_scripts import quality_filtering, get_study_variables_info
 
 parser = ArgumentParser()
@@ -25,7 +25,7 @@ with open("token.txt", "r") as f:
 
 resource = get_HPDS_connection(token, PICSURE_network_URL, resource_id)
 
-studies_info = pd.read_csv("../studies_info.csv",
+studies_info = pd.read_csv("./studies_info.csv",
                            index_col=0, 
                           converters={"phs_list": literal_eval})
 study_name = studies_info.loc[phs, "BDC_study_name"]

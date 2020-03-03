@@ -1,12 +1,19 @@
 from typing import Union, List
 
+import pandas as pd
+
 import PicSureHpdsLib
 import PicSureClient
 
+from python_lib.utils import get_multiIndex_variablesDict, timer_decorator
 
-def get_HPDS_connection(my_token: str,
+
+def get_HPDS_connection(my_token: str = None,
                         PICSURE_network_URL: str = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
                         resource_id: str = "02e23f52-f354-4e8b-992c-d37c8b9ba140"):
+    if my_token is None:
+        with open("token.txt", "r") as f:
+            token = f.read()
     client = PicSureClient.Client()
     connection = client.connect(PICSURE_network_URL, my_token)
     adapter = PicSureHpdsLib.Adapter(connection)
@@ -61,10 +68,12 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
             return query.getResultsDataFrame(**kwargs)
         elif result_type == "count":
             return query.getCount(**kwargs)
+        elif result_type == "string":
+            return query.getResults(**kwargs)
         else:
             raise ValueError("""
             {result_type} provided is not a recognized result_type for query object,
-            instead should be one of the following: ["DataFrame", "count"]
+            instead should be one of the following: ["DataFrame", "count", "string"]
             """.format(result_type=result_type))
 
     if to_filter is not None:
@@ -87,6 +96,38 @@ def get_mock_df(resource=None):
     facts = query_runner(resource=resource,
                          to_anyof=selected_var,
                          result_type="DataFrame")
+    return facts
+
+
+def get_whole_dic(resource=None):
+    if resource is None:
+        with open("token.txt", "r") as f:
+            token = f.read()
+        resource = get_HPDS_connection(token)
+    plain_variablesDict = resource.dictionary().find().DataFrame()
+    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+    return variablesDict
+    
+
+@timer_decorator
+def get_one_study(resource, 
+                  phs: str,
+                  studies_info: pd.DataFrame,
+                  variablesDict: pd.DataFrame=None,
+                  result_type: str="DataFrame",
+                  **kwargs) -> pd.DataFrame:
+    if variablesDict is None:
+        plain_variablesDict = resource.dictionary().find().DataFrame()
+        variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+    consent_var = '\\_Consents\\Short Study Accession with Consent Code\\'
+    phs_list = studies_info.loc[phs, "phs_list"]
+    study_name = studies_info.loc[phs, "BDC_study_name"]
+    selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
+    facts = query_runner(resource=resource,
+                         to_select=selected_var,
+                         to_filter={consent_var: phs_list},
+                         result_type=result_type,
+                         **kwargs)
     return facts
 
 
