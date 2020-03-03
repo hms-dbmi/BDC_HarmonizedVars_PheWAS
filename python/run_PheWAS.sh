@@ -1,5 +1,5 @@
 #INPUT=./studies_info.csv
-INPUT=phs_list.txt
+INPUT=sublist_phs.txt
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
 CORES=8
 JOBS=`ps -df | grep run_PheWAS | wc -l`

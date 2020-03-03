@@ -32,6 +32,8 @@ dependent_var_names = [harmonized_var_names[i] for i in [4, 22, 58]]
 big_dic_pvalues = {} 
 big_dic_errors = {}
 for dependent_var_name in dependent_var_names:
+    print(phs)
+    print(dependent_var_name)
     print("entering PheWAS")
     dic_pvalues, dic_errors = PheWAS(study_variables, dependent_var_name, resource)
     print("PheWAS done")
