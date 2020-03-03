@@ -13,12 +13,13 @@ def get_HPDS_connection(my_token: str = None,
                         resource_id: str = "02e23f52-f354-4e8b-992c-d37c8b9ba140"):
     if my_token is None:
         with open("token.txt", "r") as f:
-            token = f.read()
+            my_token = f.read()
     client = PicSureClient.Client()
     connection = client.connect(PICSURE_network_URL, my_token)
     adapter = PicSureHpdsLib.Adapter(connection)
     db_con = adapter.useResource(resource_id)
     return db_con
+
 
 
 def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
@@ -123,6 +124,7 @@ def get_one_study(resource,
     phs_list = studies_info.loc[phs, "phs_list"]
     study_name = studies_info.loc[phs, "BDC_study_name"]
     selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
+    print(selected_var)
     facts = query_runner(resource=resource,
                          to_select=selected_var,
                          to_filter={consent_var: phs_list},
