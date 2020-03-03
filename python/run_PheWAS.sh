@@ -10,9 +10,12 @@ echo "cores at the beginning: $CORES"
 #[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
 #while read phs BDC_study_name official_study_name short_name harmonized phs_list ID_varName
 
-for f in $(ls ./studies_stats | grep "phs.*csv");
+#for f in $(ls ./studies_stats | grep "phs.*csv");
+#!/bin/bash
+input="/path/to/txt/file"
+while IFS= read -r phs
 do
-     phs=${f::9}
+     #phs=${f::9}
      JOBS=`ps -df | grep run_PheWAS | wc -l`
         while [ "$[$CORES + 1]" -le "$JOBS" ]; do
                 #echo "cores loop $CORES"
@@ -20,7 +23,7 @@ do
                 sleep 2
                 JOBS=`ps -df | grep run_PheWAS | wc -l`
         done
-        #echo $phs
+       # echo $phs
         echo "launching process: $phs"
         nohup python run_PheWAS.py --phs=$phs > logs/log_PheWAS_$phs.txt &
 done < $INPUT
