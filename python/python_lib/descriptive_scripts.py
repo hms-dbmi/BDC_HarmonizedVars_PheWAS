@@ -41,7 +41,7 @@ def quality_checking(study_df: pd.DataFrame) -> np.array:
     
     import warnings
     warnings.filterwarnings("ignore", 'This pattern has match groups')
-    mask_varnames = study_df.columns.str.contains("(\WID\W)|(identifier)", regex=True)
+    mask_varnames = study_df.columns.str.contains("((\\\\|_|^|\W)ID(\\\\|_|\W|$))|(identifier)", regex=True)
     zeroOne_filter = study_df.apply(lambda x: len(x.dropna().unique()) in [0, 1])
     unique_filter = _filter_unique_values(study_df)
     
@@ -104,7 +104,7 @@ def get_study_variables_info(original_df: pd.DataFrame,
     }
     dic_quantiles = {k: prop_non_null_values.apply(lambda x: x > threshold).sum().values[0] for k, threshold in thresholds.items()}
     
-    mean_non_null = non_null_values.mean()
+    mean_non_null = round(non_null_values.mean(),1)
     median_non_null = non_null_values.median()
     non_null = {**dic_quantiles, 
                "Mean non-null value count per variable": mean_non_null,

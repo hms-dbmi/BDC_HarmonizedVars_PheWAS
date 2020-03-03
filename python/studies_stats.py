@@ -40,7 +40,7 @@ filtered_df = quality_filtering(original_df)
 print("shape filtered_df: {0}".format(filtered_df.shape))
 
 
-variables_info =get_study_variables_info(original_df, filtered_df)
+variables_info = get_study_variables_info(original_df, filtered_df)
 pprint(variables_info)
 
 var_info_df = pd.DataFrame({(i, j): variables_info[i][j]
