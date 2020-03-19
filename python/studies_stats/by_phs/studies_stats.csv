@@ -1,0 +1,60 @@
+,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Variable types,Variable types,Variable types,Variable types,Variables count,Variables count,Variables count,Variables count
+,Mean non-null value count per variable,Median non-null value count per variable,nb var > 10% non-null values,nb var > 25% non-null values,nb var > 50% non-null values,nb var > 75% non-null values,nb var > 90% non-null values,bool,float64,int64,object,ID variables,Nb total variables,Phenotypes variables,Total number subjects
+Genetics of Lipid Lowering Drugs and Diet Network (GOLDN) Lipidomics Study,749.1775700934579,36.0,17,8,8,8,8,,98,1.0,8,16,123,107,8544
+"NHLBI TOPMed: Study of African Americans, Asthma, Genes and Environment (SAGE) Study",1673.625,2104.0,16,14,14,11,9,,5,1.0,10,14,30,16,2106
+NHLBI TOPMed: Rare Variants for Hypertension in Taiwan Chinese (THRV),1780.082191780822,1876.0,57,41,6,6,6,,52,1.0,20,18,91,73,5473
+Genome-wide Association Study of Adiposity in Samoans,2958.043209876543,3401.5,149,144,138,138,119,,93,1.0,68,14,176,162,3503
+NHLBI TOPMed: Genetics of Cardiometabolic Health in the Amish,1113.142857142857,1110.0,56,52,33,6,6,1.0,38,1.0,16,20,76,56,2192
+Genetics of Lipid Lowering Drugs and Diet Network (GOLDN) Lipidomics Study,749.1775700934579,36.0,17,8,8,8,8,,98,1.0,8,16,123,107,8544
+"NHLBI TOPMed: Study of African Americans, Asthma, Genes and Environment (SAGE) Study",1673.625,2104.0,16,14,14,11,9,,5,1.0,10,14,30,16,2106
+NHLBI TOPMed: Rare Variants for Hypertension in Taiwan Chinese (THRV),1780.082191780822,1876.0,57,41,6,6,6,,52,1.0,20,18,91,73,5473
+Genome-wide Association Study of Adiposity in Samoans,2958.043209876543,3401.5,149,144,138,138,119,,93,1.0,68,14,176,162,3503
+NHLBI TOPMed: Genetics of Cardiometabolic Health in the Amish,1113.142857142857,1110.0,56,52,33,6,6,1.0,38,1.0,16,20,76,56,2192
+Multi-Ethnic Study of Atherosclerosis (MESA) Cohort,4136.086559062991,4154.0,4965,4237,3238,1374,1374,,3695,1.0,3305,471,7472,7001,9780
+Genetic Epidemiology of COPD (COPDGene),7550.009463722397,9910.0,305,273,219,204,183,,138,1.0,178,25,342,317,10385
+Genetic Epidemiology Network of Salt Sensitivity (GenSalt),1338.5555555555557,1000.0,9,9,9,4,4,,4,1.0,4,15,24,9,1776
+MGH Atrial Fibrillation Study,872.88,1025.0,24,24,20,19,19,,12,1.0,12,12,37,25,1025
+Framingham Cohort,2060.440083073728,615.0,1535,321,246,246,246,,3270,1.0,1544,746,5561,4815,18267
+NHGRI Genome-Wide Association Study of Venous Thromboembolism (GWAS of VTE),1802.172413793104,2475.0,27,23,16,15,15,,9,1.0,19,23,52,29,2652
+NHLBI TOPMed: The Vanderbilt Atrial Fibrillation Registry,1043.6875,1134.0,15,15,15,15,14,,6,1.0,9,17,33,16,1134
+Heart and Vascular Health Study (HVH),1166.3125,1204.0,31,31,31,31,31,,7,1.0,24,8,40,32,1204
+NHLBI TOPMed: Novel Risk Factors for the Development of Atrial Fibrillation in Women,110.34883720930232,118.0,43,42,42,41,34,,31,1.0,11,20,63,43,118
+Genes-Environments and Admixture in Latino Asthmatics (GALA II) Study,3523.133333333333,4458.0,14,14,13,10,8,,5,1.0,9,14,29,15,4462
+NHLBI TOPMed: San Antonio Family Heart Study (SAFHS),2485.0333333333333,2262.0,29,27,8,5,5,,16,1.0,13,18,48,30,5022
+NHLBI TOPMed: Boston Early-Onset COPD Study in the TOPMed Program,73.85714285714286,80.0,14,13,13,13,11,,8,1.0,5,17,31,14,80
+NHLBI TOPMed: HyperGEN - Genetics of Left Ventricular (LV) Hypertrophy,2532.645390070922,1731.0,5,5,5,5,5,,105,1.0,35,21,162,141,32576
+NHLBI TOPMed: Diabetes Heart Study (DHS) African American Coronary Artery Calcification (AA CAC),492.09677419354836,405.0,30,29,6,6,6,,20,1.0,10,24,55,31,981
+NHLBI TOPMed: African American Sarcoidosis Genetics Resource,312.4594594594595,239.0,34,13,7,5,5,,10,1.0,26,16,53,37,966
+NHLBI TOPMed: The Vanderbilt AF Ablation Registry,172.70588235294116,173.0,17,17,17,17,17,,7,1.0,9,16,33,17,173
+Genetic Epidemiology Network of Arteriopathy (GENOA),1401.0506607929512,1433.0,319,117,38,12,12,,314,1.0,139,14,468,454,6177
+GeneSTAR NextGen Functional Genomics of Platelet Aggregation,245.30088495575225,244.0,113,113,103,6,6,,97,1.0,15,14,127,113,414
+CCF AFIB GWAS study,543.0,543.0,3,3,3,3,3,,1,1.0,1,13,16,3,543
+The Jackson Heart Study (JHS),1272.20326988775,686.0,1927,1034,281,279,278,,1765,1.0,2332,479,4577,4098,6965
+NHLBI TOPMed: The Genetics and Epidemiology of Asthma in Barbados,1238.6829268292686,1527.0,38,32,29,29,6,,13,1.0,27,15,56,41,1857
+NHLBI TOPMed: The Genetic Epidemiology of Asthma in Costa Rica,2063.315789473684,1504.0,17,16,7,7,7,,7,1.0,11,21,40,19,3789
+NHLBI TOPMed: Partners HealthCare Biobank,126.6,128.0,15,15,15,15,14,,7,1.0,7,19,34,15,128
+Multi-Ethnic Study of Atherosclerosis (MESA) Cohort,4136.086559062991,4154.0,4965,4237,3238,1374,1374,,3695,1.0,3305,471,7472,7001,9780
+Genetic Epidemiology of COPD (COPDGene),7550.009463722397,9910.0,305,273,219,204,183,,138,1.0,178,25,342,317,10385
+Genetic Epidemiology Network of Salt Sensitivity (GenSalt),1338.5555555555557,1000.0,9,9,9,4,4,,4,1.0,4,15,24,9,1776
+MGH Atrial Fibrillation Study,872.88,1025.0,24,24,20,19,19,,12,1.0,12,12,37,25,1025
+Framingham Cohort,2060.440083073728,615.0,1535,321,246,246,246,,3270,1.0,1544,746,5561,4815,18267
+NHGRI Genome-Wide Association Study of Venous Thromboembolism (GWAS of VTE),1802.1724137931037,2475.0,27,23,16,15,15,,9,1.0,19,23,52,29,2652
+NHLBI TOPMed: The Vanderbilt Atrial Fibrillation Registry,1043.6875,1134.0,15,15,15,15,14,,6,1.0,9,17,33,16,1134
+Heart and Vascular Health Study (HVH),1166.3125,1204.0,31,31,31,31,31,,7,1.0,24,8,40,32,1204
+NHLBI TOPMed: Novel Risk Factors for the Development of Atrial Fibrillation in Women,110.34883720930232,118.0,43,42,42,41,34,,31,1.0,11,20,63,43,118
+DCC Harmonized data set,103540.43902439023,63091.0,73,47,29,29,18,,67,,15,1,83,82,234577
+Genes-Environments and Admixture in Latino Asthmatics (GALA II) Study,3523.133333333333,4458.0,14,14,13,10,8,,5,1.0,9,14,29,15,4462
+NHLBI TOPMed: San Antonio Family Heart Study (SAFHS),2485.0333333333333,2262.0,29,27,8,5,5,,16,1.0,13,18,48,30,5022
+NHLBI TOPMed: Boston Early-Onset COPD Study in the TOPMed Program,73.85714285714286,80.0,14,13,13,13,11,,8,1.0,5,17,31,14,80
+NHLBI TOPMed: HyperGEN - Genetics of Left Ventricular (LV) Hypertrophy,2532.645390070922,1731.0,5,5,5,5,5,,105,1.0,35,21,162,141,32576
+NHLBI TOPMed: Diabetes Heart Study (DHS) African American Coronary Artery Calcification (AA CAC),492.09677419354836,405.0,30,29,6,6,6,,20,1.0,10,24,55,31,981
+NHLBI TOPMed: African American Sarcoidosis Genetics Resource,312.4594594594595,239.0,34,13,7,5,5,,10,1.0,26,16,53,37,966
+NHLBI TOPMed: The Vanderbilt AF Ablation Registry,172.70588235294116,173.0,17,17,17,17,17,,7,1.0,9,16,33,17,173
+Genetic Epidemiology Network of Arteriopathy (GENOA),1401.0506607929512,1433.0,319,117,38,12,12,,314,1.0,139,14,468,454,6177
+GeneSTAR NextGen Functional Genomics of Platelet Aggregation,245.30088495575225,244.0,113,113,103,6,6,,97,1.0,15,14,127,113,414
+CCF AFIB GWAS study,543.0,543.0,3,3,3,3,3,,1,1.0,1,13,16,3,543
+The Jackson Heart Study (JHS),1272.20326988775,686.0,1927,1034,281,279,278,,1765,1.0,2332,479,4577,4098,6965
+NHLBI TOPMed: The Genetics and Epidemiology of Asthma in Barbados,1238.6829268292686,1527.0,38,32,29,29,6,,13,1.0,27,15,56,41,1857
+NHLBI TOPMed: The Genetic Epidemiology of Asthma in Costa Rica,2063.315789473684,1504.0,17,16,7,7,7,,7,1.0,11,21,40,19,3789
+NHLBI TOPMed: Partners HealthCare Biobank,126.6,128.0,15,15,15,15,14,,7,1.0,7,19,34,15,128
+DCC Harmonized data set,103540.43902439023,63091.0,73,47,29,29,18,,67,,15,1,83,82,234577

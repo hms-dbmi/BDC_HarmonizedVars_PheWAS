@@ -1,0 +1,83 @@
+,non-null values,unique values
+\DCC Harmonized data set\01 - Demographics\A distinct subgroup within a study  generally indicating subjects who share similar characteristics due to study design. Subjects may belong to only one subcohort.\,218746,28
+\DCC Harmonized data set\01 - Demographics\Harmonized race category of participant.\,230993,8
+\DCC Harmonized data set\01 - Demographics\Indicator of Hispanic or Latino ethnicity.\,188904,4
+\DCC Harmonized data set\01 - Demographics\Recruitment/field center  baseline clinic  or geographic region.\,212528,65
+\DCC Harmonized data set\01 - Demographics\Subject sex  as recorded by the study.\,233029,3
+\DCC Harmonized data set\01 - Demographics\classification of Hispanic/Latino background for Hispanic/Latino subjects where country or region of origin information is available\,18612,8
+\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of four values: maximum of multiple thickness estimates from the left far wall  left near wall  right far wall  and right near wall.\,30473,6866
+\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of two values: mean of multiple thickness estimates from the left far wall and from the right far wall.\,35419,16523
+\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcification (CAC) score using Agatston scoring of CT scan(s) of coronary arteries\,15042,5219
+\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcium volume using CT scan(s) of coronary arteries\,11098,3728
+\DCC Harmonized data set\02 - Atherosclerosis\Extent of narrowing of the carotid artery.\,15098,7
+\DCC Harmonized data set\02 - Atherosclerosis\Presence or absence of carotid plaque.\,27343,3
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_score_1\,15042,2017
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_volume_1\,11098,2129
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_plaque_1\,27343,77
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_stenosis_1\,15098,66
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_1\,35419,77
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_2\,30473,76
+\DCC Harmonized data set\03 - Baseline common covariates\Body height at baseline.\,230286,1150
+\DCC Harmonized data set\03 - Baseline common covariates\Body mass index calculated at baseline.\,230917,115011
+\DCC Harmonized data set\03 - Baseline common covariates\Body weight at baseline.\,230656,4860
+\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject currently smokes cigarettes.\,228687,3
+\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject ever regularly smoked cigarettes.\,225270,3
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of bmi_baseline_1\,230917,5002
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of current_smoker_baseline_1\,228687,4817
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of ever_smoker_baseline_1\,225270,4815
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of height_baseline_1\,230286,5002
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of weight_baseline_1\,230656,5003
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of basophils in the blood (bld).\,36585,830
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of eosinophils in the blood (bld).\,37425,2396
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of lymphocytes in the blood (bld).\,39701,6658
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of monocytes in the blood (bld).\,39646,3102
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of neutrophils in the blood (bld).\,38284,8201
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of platelets in the blood (bld).\,190176,692
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of red blood cells in the blood (bld).\,39709,660
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of white blood cells in the blood (bld).\,192345,1214
+\DCC Harmonized data set\04 - Blood cell count\Measurement of hematocrit  the fraction of volume (vfr) of blood (bld) that is composed of red blood cells.\,193468,903
+\DCC Harmonized data set\04 - Blood cell count\Measurement of mass per volume  or mass concentration (mcnc)  of hemoglobin in the blood (bld).\,193366,379
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the average mass (entmass) of hemoglobin per red blood cell(rbc)  known as mean corpuscular hemoglobin (MCH).\,39648,4155
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the average volume (entvol) of red blood cells (rbc)  known as mean corpuscular volume (MCV).\,44592,5793
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\,51292,5704
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the mean volume (entvol) of platelets in the blood (bld)  known as mean platelet volume (MPV or PMV).\,13816,79
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\,28033,189
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of basophil_ncnc_bld_1\,36585,80
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of eosinophil_ncnc_bld_1\,37425,80
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of hematocrit_vfr_bld_1\,193468,3075
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of hemoglobin_mcnc_bld_1\,193366,3075
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of lymphocyte_ncnc_bld_1\,39701,80
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mch_entmass_rbc_1\,39648,85
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mchc_mcnc_rbc_1\,51292,88
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mcv_entvol_rbc_1\,44592,85
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of monocyte_ncnc_bld_1\,39646,80
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of neutrophil_ncnc_bld_1\,38284,80
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of platelet_ncnc_bld_1\,190176,3069
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of pmv_entvol_bld_1\,13816,77
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of rbc_ncnc_bld_1\,39709,85
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of rdw_ratio_rbc_1\,28033,79
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of wbc_ncnc_bld_1\,192345,3074
+\DCC Harmonized data set\05 - Blood pressure\Indicator for use of antihypertensive medication at the time of blood pressure measurement.\,207129,3
+\DCC Harmonized data set\05 - Blood pressure\Resting diastolic blood pressure from the upper arm in a clinical setting.\,225933,417
+\DCC Harmonized data set\05 - Blood pressure\Resting systolic blood pressure from the upper arm in a clinical setting.\,225933,670
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of antihypertensive_meds_1\,207129,3502
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_diastolic_1\,225933,4457
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_systolic_1\,225933,4457
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of high-density lipoprotein cholesterol\,65675,272
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of low-density lipoprotein cholesterol\,64714,12669
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of total cholesterol\,65706,785
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of triglycerides\,65705,1038
+\DCC Harmonized data set\06 - Lipids\Indicates whether participant fasted for at least eight hours prior to blood draw to measure lipids phenotypes.\,64894,3
+\DCC Harmonized data set\06 - Lipids\Indicates whether participant was taking any lipid-lowering medication at blood draw to measure lipids phenotypes\,58961,3
+\DCC Harmonized data set\06 - Lipids\age at measurement of fasting_lipids_1\,64894,2290
+\DCC Harmonized data set\06 - Lipids\age at measurement of hdl_1\,65675,2175
+\DCC Harmonized data set\06 - Lipids\age at measurement of ldl_1\,64714,2156
+\DCC Harmonized data set\06 - Lipids\age at measurement of lipid_lowering_medication_1\,58961,124
+\DCC Harmonized data set\06 - Lipids\age at measurement of total_cholesterol_1\,65706,2175
+\DCC Harmonized data set\06 - Lipids\age at measurement of triglycerides_1\,65705,2175
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\Age of subject at the start of the follow up period during which venous thromboembolism (VTE) events were reviewed and adjudicated.\,61691,16421
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject experienced a venous thromboembolism event (VTE) that was verified by adjudication or by medical professionals.\,63091,3
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject had a venous thromboembolism (VTE) event prior to the start of the medical review process (including self-reported events).\,62444,3
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_case_status_1\,63091,6093
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_prior_history_1\,62444,4109
+\DCC Harmonized data set\TECHNICAL-VARS\SUBJECT_ID\,68693,67614

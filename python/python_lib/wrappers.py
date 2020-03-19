@@ -1,6 +1,7 @@
 from typing import Union, List
 
 import pandas as pd
+import numpy as np
 
 import PicSureHpdsLib
 import PicSureClient
@@ -100,15 +101,35 @@ def get_mock_df(resource=None):
     return facts
 
 
-def get_whole_dic(resource=None):
+def get_whole_dic(resource=None, 
+                  batch_size=500):
     if resource is None:
         with open("token.txt", "r") as f:
             token = f.read()
         resource = get_HPDS_connection(token)
     plain_variablesDict = resource.dictionary().find().DataFrame()
     variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
-    return variablesDict
+
+    def _get_batch_groups(variablesDict: pd.DataFrame,
+                         batch_size) ->list:
+        # Return vector of integer, representing batch group indices, useful to process varibles in batches for the PheWAS pipeline
+        len_dic = variablesDict.shape[0]
+        batch_indices = []
+        for batch_group in range(0, int(np.ceil(len_dic / batch_size))):        
+            batch_indice = 0
+            while batch_indice < batch_size:
+                batch_indices.append(batch_group)
+                batch_indice += 1
+        return batch_indices[ :len_dic]
     
+    batch_indices = _get_batch_groups(variablesDict, batch_size)
+    variablesDict["batch_group"] = batch_indices
+    with open("./batch_list.txt", "w+") as f:
+        for line in variablesDict["batch_group"].astype(str).unique().tolist():
+            f.write("{0}\n".format(line))
+    variablesDict.to_csv("env_variables/multiIndex_variablesDict.csv")
+    return 
+ 
 
 @timer_decorator
 def get_one_study(resource, 
@@ -124,7 +145,6 @@ def get_one_study(resource,
     phs_list = studies_info.loc[phs, "phs_list"]
     study_name = studies_info.loc[phs, "BDC_study_name"]
     selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
-    print(selected_var)
     facts = query_runner(resource=resource,
                          to_select=selected_var,
                          to_filter={consent_var: phs_list},

@@ -1,0 +1,3 @@
+,Variables count,Variables count,Variables count,Variables count,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Number variables with non-null values,Variable types,Variable types,Variable types
+,Nb total variables,Total number subjects,ID variables,Phenotypes variables,nb var > 10% non-null values,nb var > 25% non-null values,nb var > 50% non-null values,nb var > 75% non-null values,nb var > 90% non-null values,Mean non-null value count per variable,Median non-null value count per variable,object,int64,float64
+CCF AFIB GWAS study,16,543,13,3,3,3,3,3,3,543.0,543.0,1,1,1
