@@ -1,9 +1,27 @@
-# PIC-SURE_API BioData Catalyst examples
-Jupyter Notebooks examples of PIC-SURE API use-cases, using BioData Catalyst studies. PIC-SURE API is available in two languages --R and python. PIC-SURE API requires R 3.5 or later, or python 3.6 or later.
+# PheWAS using PICSURE API
 
-## Repo organisation
+Goal of the project is to perform a PheWAS analysis using the PICSURE API, across the different TOPMed and TOPMed related studies from BioDataCatalyst, by using any of the Harminized Phenotypes Variables. 
 
-Several notebooks examples are available for both R and python in the respective folders: 
-  - HPDS_connection.ipynb: **Start from here if you're using the PIC-SURE API for the first time**. This notebook explain how to get a user specific security token, mandatory to be able to run the other notebooks.
-  - PICSURE-API_101.ipynb: An illustration of the main functionalities of the PIC-SURE API.
-  - PheWAS.ipynb: A straightforward PIC-SURE API use-case, using a PheWAS analysis as an illustration example.
+
+## Repo organization
+
+Files: 
+
+- run_PheWAS.py: main script, run a phewas analysis for one single study
+- span_run_PheWAS.sh: span the run_PheWAS script into multiple processes
+- studies_stats.py: run high level statistics for one study
+- span_studies_stats.sh: span the run_studies_stats script into multi processes
+- `compile_variables_stats.py`: merge individual study results of run_PheWAS.py 
+- `compile_studies_stats.py`: merge individual study results of studies_stats.py
+
+Folders:
+
+- `python_lib` : 
+    - `utils.py` contains mainly functions used to enhance PICSURE API, as get_multiIndex_VariablesDict
+    - `wrappers.py` contains user defined higher-level functions to ease retrieving patient-level data using PICSURE API
+    - `PheWAS_funcs.py` wrappers functions for one phewas analysis: used to scale up the phewas across multiple independent studies
+    - `descriptive_scripts`: script used to describe each individual studies at a high level, ie number of categorical, continuous variables, ratio of null/non null values among one study variables
+- `results`: contain results for the PheWAS analysis
+- `studies_stats`: contain results for the high level statistics for each studizes
+- `env_variables`: information to select studies to be used
+
