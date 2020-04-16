@@ -102,13 +102,8 @@ def get_mock_df(resource=None):
 
 
 def get_whole_dic(resource=None, 
-                  batch_size=500):
-    if resource is None:
-        with open("token.txt", "r") as f:
-            token = f.read()
-        resource = get_HPDS_connection(token)
-    plain_variablesDict = resource.dictionary().find().DataFrame()
-    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+                  batch_size: int = None, 
+                  write: bool = False):
 
     def _get_batch_groups(variablesDict: pd.DataFrame,
                          batch_size) ->list:
@@ -121,14 +116,28 @@ def get_whole_dic(resource=None,
                 batch_indices.append(batch_group)
                 batch_indice += 1
         return batch_indices[ :len_dic]
+
+    if resource is None:
+        with open("token.txt", "r") as f:
+            token = f.read()
+        resource = get_HPDS_connection(token)
+
+    plain_variablesDict = resource.dictionary().find().DataFrame()
+    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
     
-    batch_indices = _get_batch_groups(variablesDict, batch_size)
-    variablesDict["batch_group"] = batch_indices
-    with open("./batch_list.txt", "w+") as f:
-        for line in variablesDict["batch_group"].astype(str).unique().tolist():
-            f.write("{0}\n".format(line))
-    variablesDict.to_csv("env_variables/multiIndex_variablesDict.csv")
-    return 
+    if batch_size is not None:
+        batch_indices = _get_batch_groups(variablesDict, batch_size)
+        variablesDict["batch_group"] = batch_indices
+        with open("./batch_list.txt", "w+") as f:
+            for line in variablesDict["batch_group"].astype(str).unique().tolist():
+                f.write("{0}\n".format(line))
+
+    if write is True:
+        variablesDict.to_csv("env_variables/multiIndex_variablesDict.csv")
+        return
+    else:
+        return variablesDict
+
  
 
 @timer_decorator
