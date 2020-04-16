@@ -3,13 +3,16 @@
 # Created by: Arnaud
 # Created on: 2020-02-04
 
-### DOC 
+### DOC
 # How to create named list for to_filter to work properly: to_filter = setNames(list(phs_copdgene), list(consent_dic[["name"]]))
 #
 #
-get_HPDS_connection <- function(PICSURE_network_URL,
-                                resource_id,
-                                my_token) {
+
+source("utils.R")
+get_HPDS_connection <- function(PICSURE_network_URL = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
+                                resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140",
+                                my_token = NULL) {
+    if (is.null(my_token)) {my_token = scan("./token.txt")}
     myconnection <- picsure::connect(url = PICSURE_network_URL, token = my_token)
     hpds::get.resource(myconnection, resourceUUID = resource_id)
 }
@@ -80,4 +83,19 @@ query_runner <- function(resource,
                           to_require = to_require,
                           to_anyof = to_anyof)
     hpds::query.run(query = query, result.type = result_type)
+}
+
+get_whole_dic <- function(resource = NULL,
+                          write = FALSE) {
+    if (is.null(resource)) {
+        token <- scan("token.txt")
+        resource <- get_HPDS_connection(my_token = token)
+    }
+    plain_variablesDict <- hpds::find.in.dictionary(resource) %>% hpds::extract.dataframe()
+    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
+    if (isTRUE(write)) {
+        write.csv(variablesDict, "multiIndex_variablesDict.csv")
+    } else {
+        return(variablesDict)
+    }
 }
