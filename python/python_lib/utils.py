@@ -1,17 +1,10 @@
-from datetime import datetime
-
 import pandas as pd
 import numpy as np
 
+import PicSureHpdsLib
+import PicSureClient
 
-def timer_decorator(function):
-    def wrapper_timer(*args, **kwargs):
-        then = datetime.now()
-        output = function(*args, **kwargs)
-        print("Elapsed time for function {0}: {1}".format(datetime.now() - then,
-             function))
-        return output
-    return wrapper_timer
+from typing import List
 
 
 def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
@@ -33,28 +26,27 @@ def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
                 yield len(elem)
             else:
                 yield np.NaN
-    
-    variablesDict = variablesDict.rename_axis("varName", axis=0).sort_index()
+    variablesDict = variablesDict.rename_axis("name", axis=0).sort_index()
     multi_index = _varName_toMultiIndex(variablesDict.index)
     last_valid_name_list = _get_simplified_varname(multi_index)
     variablesDict = variablesDict.reset_index(drop=False)
     variablesDict.index = multi_index.rename(["level_" + str(n) for n, _ in enumerate(multi_index.names)])
     variablesDict["nb_modalities"] = list(_get_number_modalities(variablesDict["categoryValues"]))
-    variablesDict["simplified_varName"] = last_valid_name_list
-    columns_order = ["simplified_varName", "varName", "observationCount", "categorical", "categoryValues", "nb_modalities", "min", "max", "HpdsDataType"]
+    variablesDict["simplified_name"] = last_valid_name_list
+    columns_order = ["simplified_name", "name", "observationCount", "categorical", "categoryValues", "nb_modalities", "min", "max", "HpdsDataType"]
     return variablesDict[columns_order]
 
 
 def get_dic_renaming_vars(variablesDict: pd.DataFrame) -> dict:
-    simplified_varName = variablesDict["simplified_varName"].tolist()
-    varName = variablesDict["varName"].tolist()
+    simplified_varName = variablesDict["simplified_name"].tolist()
+    varName = variablesDict["name"].tolist()
     dic_renaming = {long: simple for long, simple in zip(varName, simplified_varName)}
     return dic_renaming
 
 
 def match_dummies_to_varNames(plain_columns: pd.Index,
                              dummies_columns: pd.Index,
-                             columns: list =["simplified_varName", "dummies_varName"]) -> pd.DataFrame:
+                             columns: list =["simplified_name", "dummies_name"]) -> pd.DataFrame:
     dic_map = {}
     for plain_col in plain_columns:
         dic_map[plain_col] = [dummy_col for dummy_col in dummies_columns if dummy_col.startswith(plain_col)]
@@ -64,8 +56,8 @@ def match_dummies_to_varNames(plain_columns: pd.Index,
 
 def joining_variablesDict_onCol(variablesDict: pd.DataFrame,
                                  df: pd.DataFrame,
-                                 left_col="simplified_varName",
-                                 right_col="simplified_varName",
+                                 left_col="simplified_name",
+                                 right_col="simplified_name",
                                 overwrite: bool = True) ->pd.DataFrame:
     # Allow to join a df to variablesDict on a specified columns, keeping the MultiIndex
     # Might become a method of object variablesDict because very specific
@@ -83,5 +75,4 @@ def joining_variablesDict_onCol(variablesDict: pd.DataFrame,
     variablesDict_joined = variablesDict_joined.reset_index(drop=False)\
         .set_index(variablesDict_index_names)
     return variablesDict_joined
-
 
