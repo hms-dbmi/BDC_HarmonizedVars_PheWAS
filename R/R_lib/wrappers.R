@@ -8,11 +8,11 @@
 #
 #
 
-source("utils.R")
+source("R_lib/utils.R")
 get_HPDS_connection <- function(PICSURE_network_URL = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
                                 resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140",
                                 my_token = NULL) {
-    if (is.null(my_token)) {my_token = scan("./token.txt")}
+    if (is.null(my_token)) {my_token = scan("./token.txt", what = "character")}
     myconnection <- picsure::connect(url = PICSURE_network_URL, token = my_token)
     hpds::get.resource(myconnection, resourceUUID = resource_id)
 }
@@ -88,7 +88,7 @@ query_runner <- function(resource,
 get_whole_dic <- function(resource = NULL,
                           write = FALSE) {
     if (is.null(resource)) {
-        token <- scan("token.txt")
+        token <- scan("token.txt", what = "character")
         resource <- get_HPDS_connection(my_token = token)
     }
     plain_variablesDict <- hpds::find.in.dictionary(resource) %>% hpds::extract.dataframe()
