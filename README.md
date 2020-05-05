@@ -7,11 +7,11 @@ Goal of the project is to perform a PheWAS analysis using the PICSURE API, acros
 
 Files: 
 
-- run_PheWAS.py: main script, run a phewas analysis for one single study
-- span_run_PheWAS.sh: span the run_PheWAS script into multiple processes
-- studies_stats.py: run high level statistics for one study
-- span_studies_stats.sh: span the run_studies_stats script into multi processes
-- `compile_variables_stats.py`: merge individual study results of run_PheWAS.py 
+- `run_PheWAS`.py: main script, run a phewas analysis for one single study
+- `span_run_PheWAS`.sh: span the run_PheWAS script into multiple processes
+- `studies_stats`.py: run high level statistics for one study
+- `span_studies_stats`.sh: span the run_studies_stats script into multi processes
+- `compile_run_PheWAS.py`: merge individual study results of run_PheWAS.py 
 - `compile_studies_stats.py`: merge individual study results of studies_stats.py
 
 Folders:
