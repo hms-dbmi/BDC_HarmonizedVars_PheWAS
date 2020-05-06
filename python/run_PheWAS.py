@@ -9,7 +9,7 @@ from python_lib.PheWAS_funcs import PheWAS
 
 parser = ArgumentParser()
 parser.add_argument("--phs", dest="phs", type=str, default=None)
-parser.add_argument("--batch_group", des="batch_group", type=int, default=None)
+parser.add_argument("--batch_group", dest="batch_group", type=int, default=None)
 args = parser.parse_args()
 phs = args.phs
 batch_group = args.batch_group
@@ -21,9 +21,9 @@ if phs is not None:
     variables_file_path = os.path.join("studies_stats", phs + "_vars.json")
     with open(variables_file_path, "r") as j:
         study_variables = json.load(j)["phenotypic variables"]
-elif nb_var is not None:
-    variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv")
-    study_variables = variablesDict.loc[dictionary["batch_group"] == batch_group, "varName"].tolist()
+elif batch_group is not None:
+    variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv", low_memory=False)
+    study_variables = variablesDict.loc[variablesDict["batch_group"] == batch_group, "name"].tolist()
 else:
     raise ValueError("phs or batch_group should be provided")
     

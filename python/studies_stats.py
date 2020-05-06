@@ -16,8 +16,6 @@ parser.add_argument("--batch_group", dest="batch_group", type=int, default=None)
 args = parser.parse_args()
 phs = args.phs
 batch_group = args.batch_group
-print(phs)
-print(batch_group)
 
 PICSURE_network_URL = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure"
 resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140"
@@ -32,15 +30,16 @@ variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv",
                            low_memory=False)
 
 if phs is not None:
-    print("entering phs")
+    print("ent,ering phs: {}".format(phs))
     studies_info = pd.read_csv("./studies_info.csv",
                            index_col=0, 
                           converters={"phs_list": literal_eval})
     study_name = studies_info.loc[phs, "BDC_study_name"]
     original_df = get_one_study(resource, phs, studies_info, variablesDict, low_memory=False)
+    print("original df shape {0}".format(original_df.shape))
 elif batch_group is not None:
-    print("entering batch_group")
-    variables_to_select = variablesDict.loc[variablesDict["batch_group"] == batch_group, "varName"].tolist()
+    print("entering batch_group: {}".format(batch_group))
+    variables_to_select = variablesDict.loc[variablesDict["batch_group"] == batch_group, "name"].tolist()
     original_df = query_runner(resource, 
                               to_select=variables_to_select,
                               low_memory=False)

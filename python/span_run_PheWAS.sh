@@ -1,7 +1,7 @@
-INPUT=batch_group.txt
+INPUT=batch_list.txt
 #INPUT=sublist_phs.txt
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
-CORES=8
+CORES=4
 JOBS=`ps -df | grep run_PheWAS | wc -l`
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"
@@ -25,7 +25,7 @@ do
         done
        # echo $phs
         echo "launching process: $phs"
-        nohup python run_PheWAS.py --phs=$phs > logs/log_PheWAS_$phs.txt &
+        nohup python run_PheWAS.py --phs=$phs > logs/PheWAS/log_PheWAS_$phs.txt &
 done < $INPUT
 #IFS=$OLDIFS
 

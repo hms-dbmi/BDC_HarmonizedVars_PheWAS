@@ -7,10 +7,7 @@ from scipy import stats
 import PicSureHpdsLib
 import PicSureClient
 
-from python_lib.utils import timer_decorator
 
-
-@timer_decorator
 def _query_HPDS(variables: list,
                 resource,
                 qtype="select") -> pd.DataFrame:
@@ -22,7 +19,6 @@ def _query_HPDS(variables: list,
     return query.getResultsDataFrame(timeout=60)
 
 
-@timer_decorator
 def _independent_var_selection(subset_variablesDict,
                                phenotypes=True,
                                nb_categories: tuple=None, 
@@ -36,7 +32,6 @@ def _independent_var_selection(subset_variablesDict,
 
     return subset_variablesDict
 
-#@timer_decorator
 #def _LRT(dependent_var_name: str,
 #        independent_var_names: str,
 #        variablesDict: pd.DataFrame,
@@ -112,7 +107,6 @@ def _LRT(dependent_var_name: str,
     return dic_pvalues, dic_errors
 
 
-#@timer_decorator
 #def PheWAS(study_name: str,
 #           dependent_var_name: str,
 #           studies_info_df: pd.DataFrame,
@@ -149,7 +143,6 @@ def _LRT(dependent_var_name: str,
 #    return dic_pvalues
 
 
-@timer_decorator
 def PheWAS(study_variables: list,
            dependent_var_name: str,
            resource) -> dict:

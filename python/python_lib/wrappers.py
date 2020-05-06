@@ -6,7 +6,7 @@ import numpy as np
 import PicSureHpdsLib
 import PicSureClient
 
-from python_lib.utils import get_multiIndex_variablesDict, timer_decorator
+from python_lib.utils import get_multiIndex_variablesDict
 
 
 def get_HPDS_connection(my_token: str = None,
@@ -139,8 +139,6 @@ def get_whole_dic(resource=None,
         return variablesDict
 
  
-
-@timer_decorator
 def get_one_study(resource, 
                   phs: str,
                   studies_info: pd.DataFrame,

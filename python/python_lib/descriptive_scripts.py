@@ -3,10 +3,7 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
-from python_lib.utils import timer_decorator
 
-
-@timer_decorator
 def _is_not_number(s):
     try:
         float(s)
@@ -15,7 +12,6 @@ def _is_not_number(s):
     return False
 
 
-@timer_decorator
 def quality_checking(study_df: pd.DataFrame) -> np.array:
     """
     1. Assert that all numerical columns are really numericals
@@ -50,7 +46,6 @@ def quality_checking(study_df: pd.DataFrame) -> np.array:
     return var_name_to_drop
 
 
-@timer_decorator
 def inferring_categorical_columns(study_df: pd.DataFrame,
                                   threshold_categorical=4) -> pd.DataFrame:
     """
@@ -73,7 +68,6 @@ def inferring_categorical_columns(study_df: pd.DataFrame,
     return potential_categorical
 
 
-@timer_decorator
 def quality_filtering(study_df):
     inferred_cat_columns = inferring_categorical_columns(study_df)
     study_df[inferred_cat_columns] = study_df[inferred_cat_columns].astype(str)
@@ -82,7 +76,6 @@ def quality_filtering(study_df):
     return filtered_df
 
 
-@timer_decorator
 def get_study_variables_info(original_df: pd.DataFrame,
                       filtered_df) -> dict:
     total_nb_subjects, nb_variables = original_df.shape
