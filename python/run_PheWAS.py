@@ -32,8 +32,9 @@ resource = get_HPDS_connection(token,
                                "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
                                "02e23f52-f354-4e8b-992c-d37c8b9ba140")
 
-harmonized_var_names = pd.read_csv("studies_stats/harmonized_details_stats.csv", index_col=0).index.tolist()
-dependent_var_names = [harmonized_var_names[i] for i in [4, 22, 58]]
+harmonized_var_df = pd.read_csv("studies_stats/by_phs/harmonized_details_stats.csv", index_col=0)
+dependent_var_names = harmonized_var_df.index[harmonized_var_df["unique values"] == 2]
+
 
 big_dic_pvalues = {} 
 big_dic_errors = {}

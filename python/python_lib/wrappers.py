@@ -144,6 +144,7 @@ def get_one_study(resource,
                   studies_info: pd.DataFrame,
                   variablesDict: pd.DataFrame=None,
                   result_type: str="DataFrame",
+                  harmonized_vars: bool=True,
                   **kwargs) -> pd.DataFrame:
     if variablesDict is None:
         plain_variablesDict = resource.dictionary().find().DataFrame()
@@ -151,9 +152,17 @@ def get_one_study(resource,
     consent_var = '\\_Consents\\Short Study Accession with Consent Code\\'
     phs_list = studies_info.loc[phs, "phs_list"]
     study_name = studies_info.loc[phs, "BDC_study_name"]
-    selected_var = variablesDict.loc[study_name, "varName"].values.tolist()
+    variablesDict = variablesDict.set_index("level_0")
+    print(variablesDict.index.unique())
+    studies_var = variablesDict.loc[study_name, "name"].values.tolist()
+    if harmonized_vars is True:
+        print(variablesDict.index.unique())
+        harmonized_vars = variablesDict.loc["DCC Harmonized data set", "name"].values.tolist()
+    else:
+        harmonized_vars = None
     facts = query_runner(resource=resource,
-                         to_select=selected_var,
+                         to_select=harmonized_vars,
+                         to_anyof=studies_var,
                          to_filter={consent_var: phs_list},
                          result_type=result_type,
                          **kwargs)

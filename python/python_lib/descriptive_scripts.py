@@ -131,8 +131,3 @@ def pandas_profiling_test(df):
     
     return table
 
-
-def table_one():
-    
-    return
-

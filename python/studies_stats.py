@@ -30,12 +30,12 @@ variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv",
                            low_memory=False)
 
 if phs is not None:
-    print("ent,ering phs: {}".format(phs))
-    studies_info = pd.read_csv("./studies_info.csv",
+    print("entering phs: {}".format(phs))
+    studies_info = pd.read_csv("./env_variables/studies_info.csv",
                            index_col=0, 
                           converters={"phs_list": literal_eval})
     study_name = studies_info.loc[phs, "BDC_study_name"]
-    original_df = get_one_study(resource, phs, studies_info, variablesDict, low_memory=False)
+    original_df = get_one_study(resource, phs, studies_info, variablesDict, harmonized_vars=True, low_memory=False)
     print("original df shape {0}".format(original_df.shape))
 elif batch_group is not None:
     print("entering batch_group: {}".format(batch_group))
@@ -44,6 +44,8 @@ elif batch_group is not None:
                               to_select=variables_to_select,
                               low_memory=False)
     print("original df shape {0}".format(original_df.shape))
+    original_df.to_csv("env_variables/variables/" + str(batch_group) + ".csv", index=False)
+
 else:
     raise ValueError("--batch_group or --phs argument should be provided")
 
@@ -67,7 +69,7 @@ variables_dic = {
 
 if phs is not None:
     var_info_df.to_csv(os.path.join("studies_stats/by_phs", phs + "_stats.csv"))
-
+    original_df.to_pickle(os.path.join("env_variables/by_phs", phs + ".pickle"))
     with open(os.path.join("studies_stats/by_phs", phs + "_vars.json"), "w+") as j:
         json.dump(variables_dic, j)
 elif batch_group is not None:

@@ -1,4 +1,4 @@
-INPUT=batch_list.txt
+INPUT=env_variables/phs_list.txt
 #INPUT=phs_list.txt
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
 CORES=1
@@ -13,7 +13,7 @@ while IFS= read -r indic; do
                 JOBS=`ps -df | grep studies_stats.py | wc -l`
         done
         echo "launching process: $indic"
-#        nohup python studies_stats.py --phs=$indic > studies_stats/by_phs/log_$indic.txt &
-        nohup python studies_stats.py --batch_group=$indic > logs/studies_stats/log_$indic.txt
+        echo $indic
+       nohup python studies_stats.py --phs=$indic > logs/studies_stats/log_$indic.txt
 done < $INPUT
 
