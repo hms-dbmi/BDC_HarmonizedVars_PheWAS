@@ -37,10 +37,11 @@ var_info_df.to_csv("studies_stats/harmonized_stats.csv")
 
 non_null = quality_harmonized.notnull().sum()
 non_null.name = "non-null values"
-unique = quality_harmonized.apply(lambda serie: len(serie.unique()))
+unique = quality_harmonized.nunique()
 unique.name = "unique values"
 
-detailed_stats = non_null.to_frame().join(unique.to_frame(), how="left")
+detailed_stats = non_null.to_frame().join(unique, how="left")\
+    .rename_axis("harmonized variables")
 detailed_stats.to_csv("studies_stats/harmonized_details_stats.csv")
 
 

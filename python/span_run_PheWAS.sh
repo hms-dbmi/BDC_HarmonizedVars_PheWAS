@@ -1,8 +1,8 @@
-INPUT=batch_list.txt
-#INPUT=sublist_phs.txt
+#INPUT=batch_list.txt
+INPUT=env_variables/phs_list.txt
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
-CORES=4
-JOBS=`ps -df | grep run_PheWAS | wc -l`
+CORES=1
+JOBS=`ps -df | grep run_PheWAS.py | wc -l`
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"
 #OLDIFS=$IFS
@@ -12,20 +12,18 @@ echo "cores at the beginning: $CORES"
 
 #for f in $(ls ./studies_stats | grep "phs.*csv");
 #!/bin/bash
-input="/path/to/txt/file"
-while IFS= read -r phs
-do
+while IFS= read -r phs;do
      #phs=${f::9}
-     JOBS=`ps -df | grep run_PheWAS | wc -l`
+        JOBS=`ps -df | grep run_PheWAS | wc -l`
         while [ "$[$CORES + 1]" -le "$JOBS" ]; do
                 #echo "cores loop $CORES"
                 #echo "jobs loop $JOBS"
                 sleep 2
-                JOBS=`ps -df | grep run_PheWAS | wc -l`
+                JOBS=`ps -df | grep run_PheWAS.py | wc -l`
         done
        # echo $phs
         echo "launching process: $phs"
-        nohup python run_PheWAS.py --phs=$phs > logs/PheWAS/log_PheWAS_$phs.txt &
+        nohup python run_PheWAS.py --phs=$phs > logs/PheWAS/log_PheWAS_$phs.txt
 done < $INPUT
 #IFS=$OLDIFS
 
