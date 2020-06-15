@@ -56,9 +56,9 @@ for study_name, dependent_var_dic in dic_pvalues.items():
                 raise TypeError("error for {}".format((study_name, dependent_var_name, variable)))
 
 df_pvalues = pd.Series(flat_dic, name="pvalues").reset_index()
-
-test2 = pd.Series(flat_dic_subvar, name="param").reset_index()
-
+df_params = pd.Series(flat_dic_subvar, name="param").reset_index()
+df_pvalues.to_csv("results/df_results/df_pvalues.csv")
+df_params.to_csv("results/df_results/df_params.csv")
 
 import matplotlib.pyplot as plt
 
@@ -86,6 +86,24 @@ df_pvalues["p_adj"] = df_pvalues["pvalues"] / len(df_pvalues["pvalues"])
 df_pvalues['log_p'] = -np.log10(df_pvalues['pvalues'])
 df_pvalues = df_pvalues.replace({np.inf: np.NaN})
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
+colors = plt.get_cmap('Set1')
+x_labels = []
+x_labels_pos = []
+
+y_lims = (0, df_pvalues["log_p"].max(skipna=True) + 50)
+threshold_top_values = df_pvalues["log_p"].sort_values(ascending=False)[0:6].iloc[-1]
+
+df_pvalues["ind"] = np.arange(1, len(df_pvalues) + 1)
+# df_pvalues["group"] = df_pvalues["group"].str.replace("[0-9]", "")
+df_grouped = df_pvalues.groupby(('level_0'))
+for num, (name, group) in enumerate(df_grouped):
+    group.plot(kind='scatter', x='ind', y='log_p', color=colors.colors[num % len(colors.colors)], ax=ax, s=20)
+    x_labels.append(name)
+    x_labels_pos.append(
+        (group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0]) / 2))  # Set label in the middle
+
 # group_counts = df_pvalues["group"].value_counts()
 # group_to_merge = group_counts[group_counts < threshold_group_cat].index
 # mask_group_to_merge = df_pvalues["group"].isin(group_to_merge)
@@ -105,23 +123,6 @@ df_pvalues = df_pvalues.replace({np.inf: np.NaN})
 # df_pvalues["variable"] = df_pvalues["variable"].str.replace("[0-9]+[A-z]*", "").to_frame()
 # order_studies = df_pvalues.index.get_level_values(0).unique().tolist()[::-1]
 # df_pvalues = df_pvalues.reindex(order_studies, level=0)
-fig = plt.figure()
-ax = fig.add_subplot(111)
-colors = plt.get_cmap('Set1')
-x_labels = []
-x_labels_pos = []
-
-y_lims = (0, df_pvalues["log_p"].max(skipna=True) + 50)
-threshold_top_values = df_pvalues["log_p"].sort_values(ascending=False)[0:6].iloc[-1]
-
-df_pvalues["ind"] = np.arange(1, len(df_pvalues) + 1)
-# df_pvalues["group"] = df_pvalues["group"].str.replace("[0-9]", "")
-df_grouped = df_pvalues.groupby(('level_0'))
-for num, (name, group) in enumerate(df_grouped):
-    group.plot(kind='scatter', x='ind', y='log_p', color=colors.colors[num % len(colors.colors)], ax=ax, s=20)
-    x_labels.append(name)
-    x_labels_pos.append(
-        (group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0]) / 2))  # Set label in the middle
     
     pair_ind = 0  # To shift label which might overlap because to close
     for n, row in group.iterrows():
