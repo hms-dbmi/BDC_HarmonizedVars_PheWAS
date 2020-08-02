@@ -32,7 +32,7 @@ var_info_df = pd.DataFrame({(i, j): variables_info[i][j]
                        index=["DCC Harmonized data set"]
                             )
 
-var_info_df.to_csv("studies_stats/harmonized_stats.csv")
+var_info_df.to_csv("studies_stats/harmonized/harmonized_stats.csv")
 
 
 non_null = quality_harmonized.notnull().sum()

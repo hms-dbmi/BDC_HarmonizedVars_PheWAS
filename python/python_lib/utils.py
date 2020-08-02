@@ -6,7 +6,6 @@ import PicSureClient
 
 from typing import List
 
-
 def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
 
     def _varName_toMultiIndex(index_varDictionnary: pd.Index) -> pd.MultiIndex:
