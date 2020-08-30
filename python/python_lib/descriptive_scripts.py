@@ -37,7 +37,11 @@ def quality_checking(study_df: pd.DataFrame) -> np.array:
     
     import warnings
     warnings.filterwarnings("ignore", 'This pattern has match groups')
-    mask_varnames = study_df.columns.str.contains("((\\\\|_|^|\W)ID(\\\\|_|\W|$))|(identifier)", regex=True)
+    list_masks = []
+    list_patterns = ["ID", "identifier", "consent"]
+    for pattern in list_patterns:
+        list_masks.append(study_df.columns.str.contains(pattern, regex=False, case=True).tolist())
+    mask_varnames = pd.DataFrame(list_masks).any()
     zeroOne_filter = study_df.apply(lambda x: len(x.dropna().unique()) in [0, 1])
     unique_filter = _filter_unique_values(study_df)
     

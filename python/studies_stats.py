@@ -6,16 +6,18 @@ import json
 
 import pandas as pd
 
-from python_lib.wrappers import get_HPDS_connection, get_one_study, query_runner
+from python_lib.wrappers import get_HPDS_connection, get_one_study, query_runner, get_whole_dic
 from python_lib.utils import get_multiIndex_variablesDict
 from python_lib.descriptive_scripts import quality_filtering, get_study_variables_info
 
 parser = ArgumentParser()
 parser.add_argument("--phs", dest="phs", type=str, default=None)
 parser.add_argument("--batch_group", dest="batch_group", type=int, default=None)
+parser.add_argument("--upstream", dest="upstream", type=str, default="False")
 args = parser.parse_args()
 phs = args.phs
 batch_group = args.batch_group
+upstream = False if args.upstream() == "False" else True
 
 PICSURE_network_URL = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure"
 resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140"
@@ -26,9 +28,15 @@ with open("token.txt", "r") as f:
 
 resource = get_HPDS_connection(token, PICSURE_network_URL, resource_id)
 
-variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv",
+if upstream:
+    variablesDict = get_whole_dic(resource, batch_size=5000, write=False)
+    variablesDict = get_multiIndex_variablesDict(variablesDict)
+    variablesDict.to_csv("env_variables/multiIndex_variablesDict.csv")
+else:
+    variablesDict = pd.read_csv("env_variables/multiIndex_variablesDict.csv",
                            low_memory=False)
 
+    
 if phs is not None:
     print("entering phs: {}".format(phs))
     studies_info = pd.read_csv("./env_variables/studies_info.csv",
@@ -40,9 +48,9 @@ if phs is not None:
 elif batch_group is not None:
     print("entering batch_group: {}".format(batch_group))
     variables_to_select = variablesDict.loc[variablesDict["batch_group"] == batch_group, "name"].tolist()
-    original_df = query_runner(resource, 
-                              to_select=variables_to_select,
-                              low_memory=False)
+    #original_df = query_runner(resource, 
+    #                          to_select=variables_to_select,
+    #                          low_memory=False)
     print("original df shape {0}".format(original_df.shape))
     original_df.to_csv("env_variables/variables/" + str(batch_group) + ".csv", index=False)
 
@@ -69,7 +77,7 @@ variables_dic = {
 
 if phs is not None:
     var_info_df.to_csv(os.path.join("studies_stats/by_phs", phs + "_stats.csv"))
-    original_df.to_pickle(os.path.join("env_variables/by_phs", phs + ".pickle"))
+    #original_df.to_pickle(os.path.join("env_variables/by_phs", phs + ".pickle"))
     with open(os.path.join("studies_stats/by_phs", phs + "_vars.json"), "w+") as j:
         json.dump(variables_dic, j)
 elif batch_group is not None:

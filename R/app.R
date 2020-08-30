@@ -119,7 +119,7 @@ app <- shinyApp(
                                                                  )
                                 )
                   ) %>% DT::formatStyle(
-                     c("Harmonized Variable Name", "Dependent Variable Name"),
+                     c("Harmonized Variable Name", "Dependent Variable Complete Name"),
                      backgroundColor = 'lightgreen') %>%
                     DT::formatStyle(
                      c("pvalue", "OR", "adjusted pvalue"),
