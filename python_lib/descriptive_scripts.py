@@ -45,7 +45,7 @@ def quality_checking(study_df: pd.DataFrame) -> np.array:
     zeroOne_filter = study_df.apply(lambda x: len(x.dropna().unique()) in [0, 1])
     unique_filter = _filter_unique_values(study_df)
     
-    var_name_to_drop = study_df.loc[:, (mask_varnames | zeroOne_filter | unique_filter)].columns
+    var_name_to_drop = study_df.loc[:, (mask_varnames.values | zeroOne_filter.values | unique_filter)].columns
     print("{0} variables to drop after quality checking".format(len(var_name_to_drop)))
     return var_name_to_drop
 

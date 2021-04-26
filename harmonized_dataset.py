@@ -2,8 +2,8 @@ import json
 
 import pandas as pd
 
-from python_lib.wrappers import get_HPDS_connection, query_runner
-from python_lib.descriptive_scripts import quality_filtering, get_study_variables_info
+from querying_hpds import get_HPDS_connection, query_runner
+from descriptive_scripts import quality_filtering, get_study_variables_info
 
 PICSURE_network_URL = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure"
 resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140"
@@ -19,7 +19,10 @@ harmonized_variables = dic_harmonized.index.tolist()
 
 harmonized_df = query_runner(resource=resource, 
                              to_anyof=harmonized_variables,
-                            low_memory=False)
+                             low_memory=False)
+
+renaming_harmonized_df = pd.read_csv("env_variables/renaming_harmonized_variables.csv")\
+                           .set_index("harmonized_complete_name")
 
 #harmonized_df = harmonized_df.set_index("Patient ID")
 quality_harmonized = quality_filtering(harmonized_df)
@@ -29,7 +32,7 @@ variables_info = get_study_variables_info(harmonized_df, quality_harmonized)
 var_info_df = pd.DataFrame({(i, j): variables_info[i][j]
                             for i in variables_info.keys()
                             for j in variables_info[i].keys()},
-                       index=["DCC Harmonized data set"]
+                            index=["DCC Harmonized data set"]
                             )
 
 var_info_df.to_csv("studies_stats/harmonized/harmonized_stats.csv")
@@ -41,7 +44,8 @@ unique = quality_harmonized.nunique()
 unique.name = "unique values"
 
 detailed_stats = non_null.to_frame().join(unique, how="left")\
-    .rename_axis("harmonized variables")
+    .rename_axis("harmonized variables")\
+    .join(renaming_harmonized_df)
 detailed_stats.to_csv("studies_stats/harmonized_details_stats.csv")
 
 

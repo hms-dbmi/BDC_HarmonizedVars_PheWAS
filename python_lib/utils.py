@@ -1,10 +1,6 @@
 import pandas as pd
 import numpy as np
 
-import PicSureHpdsLib
-import PicSureClient
-
-from typing import List
 
 def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
 
