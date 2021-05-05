@@ -12,13 +12,20 @@ def _is_not_number(s):
     return False
 
 
-def quality_checking(study_df: pd.DataFrame) -> np.array:
+def _replace_null_values(study_df):
+    return study_df.replace(["N/A", "null", "NULL", "Null"], np.NaN)
+
+
+
+def _quality_checking(study_df: pd.DataFrame,
+                      threshold_nonnull_values: int) -> np.array:
     """
     1. Assert that all numerical columns are really numericals
     2. Filter the input DataFrame regarding two criteria:
     - Drops columns with ID or identifier in their names
-    - Drops columns with 1 or less non-null values
+    - Drops columns with equal or less non-null values than specified by threshold
     - Drops columns of type strings with only unique values (identifier, cannot be used in a stat analysis anyway)
+    :param threshold_nonnull_values:
     :param study_df:
     :return:
     """
@@ -38,24 +45,24 @@ def quality_checking(study_df: pd.DataFrame) -> np.array:
     import warnings
     warnings.filterwarnings("ignore", 'This pattern has match groups')
     list_masks = []
-    list_patterns = ["ID", "identifier", "consent"]
+    list_patterns = [r"(?<=[\W]|^)ID(?=\W|$)", "identifier", "consent"]
     for pattern in list_patterns:
-        list_masks.append(study_df.columns.str.contains(pattern, regex=False, case=True).tolist())
+        list_masks.append(study_df.columns.str.contains(pattern, regex=True, case=False).tolist())
     mask_varnames = pd.DataFrame(list_masks).any()
-    zeroOne_filter = study_df.apply(lambda x: len(x.dropna().unique()) in [0, 1])
+    nonnull_filter = study_df.apply(lambda x: len(x.dropna()) <= threshold_nonnull_values)
     unique_filter = _filter_unique_values(study_df)
     
-    var_name_to_drop = study_df.loc[:, (mask_varnames.values | zeroOne_filter.values | unique_filter)].columns
+    var_name_to_drop = study_df.loc[:, (mask_varnames.values | nonnull_filter.values | unique_filter)].columns
     print("{0} variables to drop after quality checking".format(len(var_name_to_drop)))
     return var_name_to_drop
 
 
-def inferring_categorical_columns(study_df: pd.DataFrame,
-                                  threshold_categorical=4) -> pd.DataFrame:
+def _inferring_categorical_columns(study_df: pd.DataFrame,
+                                   threshold_categorical=4) -> pd.DataFrame:
     """
     Infer categorical types for numerical variables if they match two criteria:
     - Only containing integers
-    - 
+    - Less or equal numbers of unique values as specified by threshold_categorical
     :param study_df:
     :param threshold_categorical:
     :return:g
@@ -72,66 +79,10 @@ def inferring_categorical_columns(study_df: pd.DataFrame,
     return potential_categorical
 
 
-def quality_filtering(study_df):
-    inferred_cat_columns = inferring_categorical_columns(study_df)
+def quality_filtering(study_df, threshold_nonnull_values):
+    study_df = _replace_null_values(study_df)
+    inferred_cat_columns = _inferring_categorical_columns(study_df)
     study_df[inferred_cat_columns] = study_df[inferred_cat_columns].astype(str)
-    variables_to_drop = quality_checking(study_df)
+    variables_to_drop = _quality_checking(study_df, threshold_nonnull_values)
     filtered_df = study_df.drop(variables_to_drop, axis=1)
     return filtered_df
-
-
-def get_study_info(original_df: pd.DataFrame,
-                   filtered_df) -> dict:
-    total_nb_subjects, nb_variables = original_df.shape
-    nb_variables_dic = {
-        "Nb total variables": nb_variables, 
-        "Total number subjects": total_nb_subjects,
-        "ID variables": original_df.shape[1] - filtered_df.shape[1],
-        "Phenotypes variables": filtered_df.shape[1]
-    }
-    
-    non_null_values = filtered_df.notnull().sum()
-    prop_non_null_values = non_null_values.to_frame() / filtered_df.shape[0]
-    thresholds = {
-        "nb var > 10% non-null values": 0.1, 
-        "nb var > 25% non-null values": 0.25, 
-        "nb var > 50% non-null values": 0.5, 
-        "nb var > 75% non-null values": 0.75,
-        "nb var > 90% non-null values": 0.9
-    }
-    dic_quantiles = {k: prop_non_null_values.apply(lambda x: x > threshold).sum().values[0] for k, threshold in thresholds.items()}
-    
-    mean_non_null = round(non_null_values.mean(),1)
-    median_non_null = non_null_values.median()
-    non_null = {**dic_quantiles, 
-               "Mean non-null value count per variable": mean_non_null,
-               "Median non-null value count per variable": median_non_null
-    }
-    
-    var_dtypes = filtered_df.dtypes.value_counts().to_dict()
-    long_dictionary = {
-        "Variables count": nb_variables_dic, 
-        "Number variables with non-null values": non_null,
-        "Variable types": var_dtypes
-    }
-    return long_dictionary
-
-
-def _variables_description(study_df: pd.DataFrame):
-    categorical_describe = study_df.describe(include=['object']).transpose()
-    numerical_describe = study_df.describe(include=["float", "int"]).transpose()
-    return 
-
-
-
-def pandas_profiling_test(df):
-    from pandas_profiling import ProfileReport
-    
-    report = ProfileReport(df, minimal=True)
-    
-    description = report.get_description()
-    
-    table = description["table"]
-    
-    return table
-
