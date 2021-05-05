@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def gather_csvs():
-    dir_result_studies = "studies_stats/by_phs"
+    dir_result_studies = "results/studies_stats/archive/by_phs"
     list_csv_studies = [os.path.join(dir_result_studies, f) for f \
                         in os.listdir(dir_result_studies) if re.search("\.csv$", f)]
     list_csv_studies.append("./studies_stats/harmonized/harmonized_stats.csv")

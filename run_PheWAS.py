@@ -14,11 +14,11 @@ args = parser.parse_args()
 phs = args.phs
 batch_group = args.batch_group
 
-with open("token.txt", "r") as f:
+with open("env_variables/token.txt", "r") as f:
     token = f.read()
 
 if phs is not None:
-    variables_file_path = os.path.join("studies_stats", "by_phs", phs + "_vars.json")
+    variables_file_path = os.path.join("results/studies_stats", "by_phs", phs + "_vars.json")
     with open(variables_file_path, "r") as j:
          study_variables = json.load(j)["phenotypic variables"]
 elif batch_group is not None:
@@ -31,7 +31,7 @@ resource = get_HPDS_connection(token,
                                "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
                                "02e23f52-f354-4e8b-992c-d37c8b9ba140")
 
-harmonized_var_df = pd.read_csv("studies_stats/harmonized/harmonized_details_stats.csv", index_col=0)
+harmonized_var_df = pd.read_csv("results/studies_stats/harmonized/harmonized_details_stats.csv", index_col=0)
 dependent_var_names = harmonized_var_df.index[harmonized_var_df["unique values"] == 2]
 
 study_df = query_runner(resource=resource,

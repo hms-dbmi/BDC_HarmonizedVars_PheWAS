@@ -9,11 +9,11 @@ import PicSureBdcAdapter
 import PicSureClient
 
 from python_lib.utils import get_multiIndex_variablesDict
+from env_variables.env_variables import TOKEN, RESOURCE_ID, PICSURE_NETWORK_URL
 
-
-def get_HPDS_connection(my_token: str = None,
-                        URL_data: str = "https://picsure.biodatacatalyst.nhlbi.nih.gov/picsure",
-                        resource_id: str = "02e23f52-f354-4e8b-992c-d37c8b9ba140"):
+def get_HPDS_connection(my_token: str = TOKEN,
+                        URL_data: str = PICSURE_NETWORK_URL,
+                        resource_id: str = RESOURCE_ID):
     if my_token is None:
         with open("token.txt", "r") as f:
             my_token = f.read()
@@ -106,20 +106,27 @@ def get_mock_df(resource=None):
     return facts
 
 
+def get_batch_groups(variablesDict: pd.DataFrame,
+                     batch_size,
+                     assign: bool):
+    # Return vector of integer, representing batch group indices, useful to process varibles in batches for the PheWAS pipeline
+    len_dic = variablesDict.shape[0]
+    batch_indices = []
+    for batch_group in range(0, int(np.ceil(len_dic / batch_size))):
+        batch_indice = 0
+        while batch_indice < batch_size:
+            batch_indices.append(batch_group)
+            batch_indice += 1
+    batch_indices = batch_indices[:len_dic]
+    if assign is True:
+        return variablesDict.assign(batch_group=batch_indices)
+    else:
+        return batch_indices
+
+
 def get_whole_dic(resource=None,
                   batch_size: int = None,
                   write: bool = False):
-    def _get_batch_groups(variablesDict: pd.DataFrame,
-                          batch_size) -> list:
-        # Return vector of integer, representing batch group indices, useful to process varibles in batches for the PheWAS pipeline
-        len_dic = variablesDict.shape[0]
-        batch_indices = []
-        for batch_group in range(0, int(np.ceil(len_dic / batch_size))):
-            batch_indice = 0
-            while batch_indice < batch_size:
-                batch_indices.append(batch_group)
-                batch_indice += 1
-        return batch_indices[:len_dic]
     
     if resource is None:
         with open("token.txt", "r") as f:
@@ -130,9 +137,9 @@ def get_whole_dic(resource=None,
     variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
     
     if batch_size is not None:
-        batch_indices = _get_batch_groups(variablesDict, batch_size)
+        batch_indices = get_batch_groups(variablesDict, batch_size)
         variablesDict["batch_group"] = batch_indices
-        with open("./batch_list.txt", "w+") as f:
+        with open("./env_variables/batch_list.txt", "w+") as f:
             for line in variablesDict["batch_group"].astype(str).unique().tolist():
                 f.write("{0}\n".format(line))
     
@@ -143,8 +150,7 @@ def get_whole_dic(resource=None,
         return variablesDict
 
 
-def get_studies_dictionary(resource=None,
-                           whole_dic=None) -> pd.DataFrame:
+def get_studies_dictionary(resource=None) -> pd.DataFrame:
     """
     Return dataframe with names and phs number of the studies with at least one
     subject with at least one harmonized variable information
@@ -204,11 +210,7 @@ def get_one_study(resource,
                          **kwargs)
     return facts
 
-# TODO:
-def querying_harmonized_variables(resource,
-                                  dictionary):
-    
-    return harmonized_variables_dic
+
 
 if __name__ == '__main__':
     import os

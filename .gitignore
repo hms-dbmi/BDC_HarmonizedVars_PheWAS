@@ -1,4 +1,4 @@
-*token*
+env_variables/token.txt
 *__pycache__*
 *ipynb_checkpoints*
-*studies_stats/*
+results/studies_stats/*

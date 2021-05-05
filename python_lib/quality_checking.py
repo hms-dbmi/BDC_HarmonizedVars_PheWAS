@@ -80,8 +80,8 @@ def quality_filtering(study_df):
     return filtered_df
 
 
-def get_study_variables_info(original_df: pd.DataFrame,
-                      filtered_df) -> dict:
+def get_study_info(original_df: pd.DataFrame,
+                   filtered_df) -> dict:
     total_nb_subjects, nb_variables = original_df.shape
     nb_variables_dic = {
         "Nb total variables": nb_variables, 
