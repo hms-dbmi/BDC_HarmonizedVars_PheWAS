@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def get_study_info(original_df: pd.DataFrame,
                    filtered_df) -> dict:
     total_nb_subjects, nb_variables = original_df.shape

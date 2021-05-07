@@ -8,7 +8,6 @@ import pandas as pd
 
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
-
 from python_lib.PheWAS_funcs import PheWAS
 
 
@@ -27,51 +26,69 @@ class RunPheWAS:
         self.phs = phs
         self.batch_group = batch_group
         self.parameters_exp = parameters_exp
-        self.study_df = None
+        # self.study_df = None
         self.filtered_df = None
-        
-    def querying_data(self):
-        
         eligible_variables = pd.read_csv("env_variables/list_eligible_variables.csv")
         list_harmonized_variables = pd.read_csv("env_variables/list_harmonized_variables.csv")
-        
         if self.parameters_exp["variable_types"] is True:
-            dependent_var_names = list_harmonized_variables.loc[lambda df: df["categorical"] == True, "name"].tolist()
+            self.dependent_var_names = list_harmonized_variables.loc[lambda df: df["categorical"] == True, "name"].tolist()
         else:
-            dependent_var_names = list_harmonized_variables.loc[:, "name"].tolist()
-        
-        independent_var_names = eligible_variables.loc[lambda df: (df["phs"] == phs) & \
+            self.dependent_var_names = list_harmonized_variables.loc[:, "name"].tolist()
+
+        self.independent_var_names = eligible_variables.loc[lambda df: (df["phs"] == phs) & \
                                                                   (df["batch_group"] == batch_group),
                                                        "name"]
+        self.filtered_var_names = None
+
+    def querying_data(self):
         path_log = os.path.join("results/log/", self.phs, str(self.batch_group))
         if not os.path.isdir(path_log):
             os.makedirs(path_log)
         
         with open(os.path.join(path_log, "hpds_output.txt"), "w+") as file:
             with contextlib.redirect_stdout(f):
-                self.study_df = query_runner(resource=self.resource,
-                                        to_select=dependent_var_names,
-                                        to_anyof=independent_var_names,
+                study_df = query_runner(resource=self.resource,
+                                        to_select=self.dependent_var_names,
+                                        to_anyof=self.independent_var_names,
                                         result_type="DataFrame",
                                         low_memory=False,
                                         timeout=500)
-                if len(self.study_df.columns) == 4 | self.study_df.shape[0] == 0:
+                if len(study_df.columns) == 4 | study_df.shape[0] == 0:
                     raise ValueError("Data Frame empty, either no matching variable names, or server error")
-        return
+        return study_df
     
-    def quality_checking(self):
-        self.filtered_df = quality_filtering(self.study_df)
-        pd.DataFrame.from_dict({"variable_name": self.study_df.columns})\
+    def quality_checking(self, study_df):
+        self.filtered_df = quality_filtering(study_df, self.parameters_exp["Minimum number observations"])
+        self.filtered_var_names = self.filtered_df.columns
+        path_results = os.path.join("results/quality_checking", self.phs, str(self.batch_group))
+        if not os.path.isdir(path_results):
+            os.makedirs(path_results)
+        pd.DataFrame.from_dict({"variable_name": study_df.columns})\
             .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns))\
-            .to_csv(os.path.join("results/quality_checking",
-                                 self.phs,
-                                 self.batch_group,
-                                 "quality_checking.csv"),
+            .to_csv(os.path.join(path_results, "quality_checking.csv"),
                     index=False)
         return
     
     def descriptive_statistics(self):
-        #TODO: implement descriptives statistics
+        #TODO:
+        # - filtrer value_counts pour n'utiliser que les variables qualitatives
+        # - rajouter total number of non null observations
+        # - mean et median pour les variables continues
+        # - pull it together
+        # - rajouter self devant filtered_df et filtered_var_names
+        # - eventuellement transferer les fonctions dans le fichier descriptive_statistics.py
+        
+        non_null_values = filtered_df.notnull().sum()
+        
+        def _count_modalities(var_name, serie):
+            return serie.value_counts()\
+                        .rename("value").to_frame()\
+                        .rename_axis("modality", axis=0).reset_index(drop=False)\
+                        .assign(var_name=var_name, categorical=True)
+        
+        counts = [_count_modalities(var_name, serie) for var_name, serie in filtered_df[filtered_var_names].iteritems()]
+        
+        categorical_value_counts = pd.concat(counts, ignore_index=True).assign(statistics="count")
         
         return
     
@@ -93,8 +110,18 @@ if __name__ == '__main__':
     with open("env_variables/parameters_exp.yaml", "r") as f:
         parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
     
-    run_PheWAS = RunPheWAS(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID, parameters_exp)
-
+    run_PheWAS = RunPheWAS(TOKEN,
+                           PICSURE_NETWORK_URL,
+                           RESOURCE_ID,
+                           batch_group=batch_group,
+                           phs=phs,
+                           parameters_exp=parameters_exp
+                           )
+    study_df = run_PheWAS.querying_data()
+    run_PheWAS.quality_checking(study_df)
+    run_PheWAS.descriptive_statistics()
+    
+    
     dependent_dic_pvalues = {}
     dependent_dic_errors = {}
     
