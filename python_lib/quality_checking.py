@@ -13,7 +13,7 @@ def _is_not_number(s):
 
 
 def _replace_null_values(study_df):
-    return study_df.replace(["N/A", "null", "NULL", "Null"], np.NaN)
+    return study_df.replace(["N/A", "null", "NULL", "Null", "nan", "NaN", "NAN"], np.NaN)
 
 
 
@@ -80,9 +80,8 @@ def _inferring_categorical_columns(study_df: pd.DataFrame,
 
 
 def quality_filtering(study_df, threshold_nonnull_values):
-    study_df = _replace_null_values(study_df)
     inferred_cat_columns = _inferring_categorical_columns(study_df)
-    study_df[inferred_cat_columns] = study_df[inferred_cat_columns].astype(str)
+    study_df[inferred_cat_columns] = study_df[inferred_cat_columns].astype(object)
     variables_to_drop = _quality_checking(study_df, threshold_nonnull_values)
     filtered_df = study_df.drop(variables_to_drop, axis=1)
     return filtered_df

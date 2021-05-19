@@ -4,15 +4,18 @@ import pandas as pd
 import numpy as np 
 
 
-def _query_HPDS(variables: list,
-                resource,
-                qtype="select") -> pd.DataFrame:
-    query = resource.query()
-    if qtype == "select":
-        query.select().add(variables)
-    else:
-        raise ValueError("only select implemented right now")
-    return query.getResultsDataFrame(timeout=60)
+def placeholder():
+    return
+
+# def _query_HPDS(variables: list,
+#                 resource,
+#                 qtype="select") -> pd.DataFrame:
+#     query = resource.query()
+#     if qtype == "select":
+#         query.select().add(variables)
+#     else:
+#         raise ValueError("only select implemented right now")
+#     return query.getResultsDataFrame(timeout=60)
 
 
 def _independent_var_selection(subset_variablesDict,

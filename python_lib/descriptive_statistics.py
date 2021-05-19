@@ -1,46 +1,57 @@
 import pandas as pd
+import numpy as np
 
 
-def get_study_info(original_df: pd.DataFrame,
-                   filtered_df) -> dict:
-    total_nb_subjects, nb_variables = original_df.shape
-    nb_variables_dic = {
-        "Nb total variables": nb_variables,
-        "Total number subjects": total_nb_subjects,
-        "ID variables": original_df.shape[1] - filtered_df.shape[1],
-        "Phenotypes variables": filtered_df.shape[1]
-    }
+def get_descriptive_statistics(filtered_df, filtered_independent_var_names):
+    def _count_modalities(var_name, serie):
+        value_counts = serie.value_counts() \
+            .rename("value")
+        value_counts["total"] = value_counts.sum()
+        value_counts = value_counts.to_frame() \
+            .assign(var_name=var_name, var_type=lambda df: "multicategorical" if len(df["value"]) > 3 else "binary") \
+            .rename_axis("modality", axis=0) \
+            .reset_index(drop=False)
+        return value_counts
+        
+    counts = [_count_modalities(var_name, serie) for var_name, serie in
+              filtered_df[filtered_independent_var_names].iteritems()
+              if serie.dtype == "O"]
+    if len(counts) != 0:
+        categorical_statistics = pd.concat(counts, ignore_index=True).assign(statistic="count_non_null")
+    else:
+        categorical_statistics = pd.DataFrame()
     
-    non_null_values = filtered_df.notnull().sum()
+    mean_median = filtered_df[filtered_independent_var_names] \
+        .loc[:, lambda df: df.dtypes != "O"] \
+        .agg([np.mean,
+             np.median,
+             np.std,
+             np.min,
+             np.max,
+             "count"]) \
+        .rename({"np.mean": "mean",
+                 "np.median": "median",
+                 "np.std": "std",
+                 "amin": "min",
+                 "amax": "max",
+                 "count": "count_non_null"}) \
+        .rename_axis("statistic", axis=0) \
+        .reset_index(drop=False) \
+        .melt(id_vars=["statistic"],
+              var_name="var_name",
+              value_name="value") \
+        .assign(var_type="continuous")
+    
+    # non_null_values = filtered_df[filtered_independent_var_names].notnull().sum() \
+    #     .rename("value") \
+    #     .to_frame() \
+    #     .rename_axis("var_name") \
+    #     .reset_index(drop=False) \
+    #     .assign(statistic="non_null_values",
+    #             categorical=(filtered_df.dtypes == "O").values)
     #
-    
-    # prop_non_null_values = non_null_values.to_frame() / filtered_df.shape[0]
-    # thresholds = {
-    #     "nb var > 10% non-null values": 0.1,
-    #     "nb var > 25% non-null values": 0.25,
-    #     "nb var > 50% non-null values": 0.5,
-    #     "nb var > 75% non-null values": 0.75,
-    #     "nb var > 90% non-null values": 0.9
-    # }
-    # dic_quantiles = {k: prop_non_null_values.apply(lambda x: x > threshold).sum().values[0] for k, threshold in thresholds.items()}
-    
-    # mean_non_null = round(non_null_values.mean(),1)
-    # median_non_null = non_null_values.median()
-    # non_null = {**dic_quantiles,
-    #            "Mean non-null value count per variable": mean_non_null,
-    #            "Median non-null value count per variable": median_non_null
-    # }
-    
-    # var_dtypes = filtered_df.dtypes.value_counts().to_dict()
-    # long_dictionary = {
-    #     "Variables count": nb_variables_dic,
-    #     "Number variables with non-null values": non_null,
-    #     "Variable types": var_dtypes
-    # }
-    return long_dictionary
-
-
-def _variables_description(study_df: pd.DataFrame):
-    categorical_describe = study_df.describe(include=['object']).transpose()
-    numerical_describe = study_df.describe(include=["float", "int"]).transpose()
-    return
+    descriptive_statistics_df = pd.concat(
+        [categorical_statistics, mean_median],
+        ignore_index=True
+    )
+    return descriptive_statistics_df

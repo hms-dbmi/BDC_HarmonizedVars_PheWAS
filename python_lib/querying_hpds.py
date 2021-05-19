@@ -72,7 +72,9 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
     
     def _run_query(query, result_type, **kwargs):
         if result_type == "DataFrame":
-            return query.getResultsDataFrame(**kwargs)
+            return query.getResultsDataFrame(keep_default_na=True,
+                                             na_values=["Null", "NAN"],
+                                             **kwargs)
         elif result_type == "count":
             return query.getCount(**kwargs)
         elif result_type == "string":

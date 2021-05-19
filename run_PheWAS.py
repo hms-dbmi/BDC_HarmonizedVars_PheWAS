@@ -8,7 +8,8 @@ import pandas as pd
 
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
-from python_lib.PheWAS_funcs import PheWAS
+# from python_lib.associative_statistics import PheWAS
+from python_lib.descriptive_statistics import get_descriptive_statistics
 
 
 class RunPheWAS:
@@ -38,7 +39,7 @@ class RunPheWAS:
         self.independent_var_names = eligible_variables.loc[lambda df: (df["phs"] == phs) & \
                                                                   (df["batch_group"] == batch_group),
                                                        "name"]
-        self.filtered_var_names = None
+        self.filtered_independent_var_names = None
 
     def querying_data(self):
         path_log = os.path.join("results/log/", self.phs, str(self.batch_group))
@@ -59,7 +60,7 @@ class RunPheWAS:
     
     def quality_checking(self, study_df):
         self.filtered_df = quality_filtering(study_df, self.parameters_exp["Minimum number observations"])
-        self.filtered_var_names = self.filtered_df.columns
+        self.filtered_independent_var_names = list(set(self.filtered_df.columns) - set(self.dependent_var_names))
         path_results = os.path.join("results/quality_checking", self.phs, str(self.batch_group))
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
@@ -70,29 +71,35 @@ class RunPheWAS:
         return
     
     def descriptive_statistics(self):
-        #TODO:
-        # - filtrer value_counts pour n'utiliser que les variables qualitatives
-        # - rajouter total number of non null observations
-        # - mean et median pour les variables continues
-        # - pull it together
-        # - rajouter self devant filtered_df et filtered_var_names
-        # - eventuellement transferer les fonctions dans le fichier descriptive_statistics.py
-        
-        non_null_values = filtered_df.notnull().sum()
-        
-        def _count_modalities(var_name, serie):
-            return serie.value_counts()\
-                        .rename("value").to_frame()\
-                        .rename_axis("modality", axis=0).reset_index(drop=False)\
-                        .assign(var_name=var_name, categorical=True)
-        
-        counts = [_count_modalities(var_name, serie) for var_name, serie in filtered_df[filtered_var_names].iteritems()]
-        
-        categorical_value_counts = pd.concat(counts, ignore_index=True).assign(statistics="count")
-        
+        descriptive_statistics_df = get_descriptive_statistics(self.filtered_df, self.filtered_independent_var_names)
+        path_results = os.path.join("results/descriptive_statistics", self.phs, str(self.batch_group))
+        if not os.path.isdir(path_results):
+            os.makedirs(path_results)
+        descriptive_statistics_df.to_csv(os.path.join(path_results, "descriptive_statistics.csv"),
+                                         index=False)
         return
+
     
-    def run_PheWAS(self):
+    def association_statistics(self):
+    
+        dic_results = {}
+        for independent_var_name in independent_var_names:
+            dic_results_independent_var = {}
+            for dependent_var in dependent_var_names:
+                determine_dependent_var_type(dependent_var)
+                if dependent_var.type is object:
+                    if dependent_var.value_counts().shape > 2:
+                        dichotomized_dependent_vars = dichotomize(dependent_var)
+                        dic_results_independent_var[dichotomized_varname] = run_model(dichotomized_dependent_vars, independent_var_name)
+                    else:
+                        dic_results_independent_var[dependent_var] = run_model(dependent_var, independent_var_name)
+                elif dependent_var.type is not object:
+                    normalized_var = normalize(dependent_var)
+                    dic_results_independent_var[dependent_var] = run_model(normalized_var, independent_var_name)
+            dic_results[independent_var_name] = dic_results_independent_var
+
+        combined_results = combine_results(dic_results)
+        store_results(combined_results, )
         
         return
 
@@ -110,16 +117,16 @@ if __name__ == '__main__':
     with open("env_variables/parameters_exp.yaml", "r") as f:
         parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
     
-    run_PheWAS = RunPheWAS(TOKEN,
-                           PICSURE_NETWORK_URL,
-                           RESOURCE_ID,
-                           batch_group=batch_group,
-                           phs=phs,
-                           parameters_exp=parameters_exp
-                           )
-    study_df = run_PheWAS.querying_data()
-    run_PheWAS.quality_checking(study_df)
-    run_PheWAS.descriptive_statistics()
+    PheWAS = RunPheWAS(TOKEN,
+                       PICSURE_NETWORK_URL,
+                       RESOURCE_ID,
+                       batch_group=batch_group,
+                       phs=phs,
+                       parameters_exp=parameters_exp
+                       )
+    study_df = PheWAS.querying_data()
+    PheWAS.quality_checking(study_df)
+    PheWAS.descriptive_statistics()
     
     
     dependent_dic_pvalues = {}
