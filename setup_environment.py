@@ -1,5 +1,6 @@
 import yaml
 
+import numpy as np
 import pandas as pd
 
 from env_variables.env_variables import TOKEN,\
@@ -9,7 +10,8 @@ from env_variables.env_variables import TOKEN,\
 from python_lib.querying_hpds import get_HPDS_connection,\
     get_whole_dic, \
     get_studies_dictionary, \
-    get_batch_groups
+    get_batch_groups, \
+    query_runner
 
 
 resource = get_HPDS_connection(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID)
@@ -34,11 +36,43 @@ renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmo
     .loc[lambda df: df["renaming_variables"].notnull(), :]\
     .set_index("harmonized_complete_name")
 
-variables_dictionary.join(renaming_harmonized_variables_manual,
+harmonized_variables_dictionary = variables_dictionary.join(renaming_harmonized_variables_manual,
                           on="name",
                           how="inner")\
-    .loc[:, ["name", "renaming_variables", "renaming_variables_nice", "categorical"]]\
-    .reset_index(drop=True)\
+    .loc[:, ["name", "renaming_variables", "renaming_variables_nice"]]\
+    .reset_index(drop=True)
+
+list_harmonized_variables_names = harmonized_variables_dictionary["name"]
+
+harmonized_variables_df = query_runner(resource, to_select=list_harmonized_variables_names)
+
+variables_type = {}
+variables_modalities = {}
+for variable_name, serie in harmonized_variables_df[list_harmonized_variables_names].iteritems():
+    if serie.dtype == "object":
+        counts = serie.value_counts()
+        variables_modalities[variable_name] = "[" + ", ".join(counts.index.tolist()) + "]"
+        if counts.shape[0] >= 3:
+            variables_type[variable_name] = "multicategorical"
+        else:
+            variables_type[variable_name] = "binary"
+    else:
+        variables_type[variable_name] = "continuous"
+        variables_modalities[variable_name] = np.NaN
+
+
+variables_type_df = pd.DataFrame.from_dict(variables_type,
+                                           columns=["var_type"],
+                                           orient="index")\
+            .rename_axis("name", axis="index")
+variables_modalities_df = pd.DataFrame.from_dict(variables_modalities,
+                                                 columns=["modalities"],
+                                                 orient="index",
+                                                 dtype=str)\
+    .rename_axis("name", axis="index")
+
+harmonized_variables_dictionary.join(variables_type_df, on="name") \
+    .join(variables_modalities_df, on="name") \
     .to_csv("env_variables/list_harmonized_variables.csv", index=False)
 
 parameters = {
