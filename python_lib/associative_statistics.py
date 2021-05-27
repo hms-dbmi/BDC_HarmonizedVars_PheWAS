@@ -2,36 +2,327 @@ from typing import List, Tuple
 
 import pandas as pd
 import numpy as np 
+from statsmodels.discrete.discrete_model import MNLogit, Logit
+from scipy.stats import chi2_contingency, f_oneway
+
+from pandas.api.types import CategoricalDtype
+
+from statsmodels.tools.sm_exceptions import PerfectSeparationError
+# def _independent_var_selection(subset_variablesDict,
+#                                phenotypes=True,
+#                                nb_categories: tuple=None,
+#                                ):
+#     if phenotypes is True:
+#         mask_pheno = subset_variablesDict["HpdsDataType"] == "phenotypes"
+#         subset_variablesDict = subset_variablesDict.loc[mask_pheno,:]
+#     if nb_categories is not None:
+#         mask_modalities = subset_variablesDict["categorical"] == False | subset_variablesDict["nb_modalities"]\
+#             .between(*nb_categories, inclusive=True)
+#         subset_variablesDict = subset_variablesDict.loc[mask_modalities, :]
+#
+#     return subset_variablesDict
+
+list_columns_names_export = [
+    "dependent_var_name",
+    "dependent_var_modality",
+    "ref_modality_dependent",
+    "dependent_var_name",
+    "independent_var_modality",
+    "ref_modality_independent",
+    "indicator",
+    "value"
+]
+
+def multicategorical_continuous(dependent_var: pd.Series,
+                                independent_var: pd.Series,
+                                list_columns_names_export: list):
+    
+    dependent_var_name = dependent_var.name
+    independent_var_name = independent_var.name
+    long_data = pd.DataFrame.from_dict({"dependent_var_name": dependent_var,
+                                        "independent_var_name": independent_var},
+                                       orient="columns")
+    
+    groupby_stats = long_data \
+        .groupby("dependent_var_name") \
+        .agg(["min", "max", "median", "mean", "count"]) \
+        .droplevel(level=0, axis=1) \
+        .rename({"count": "nonNA_count"}, axis=1) \
+        .reset_index(drop=False) \
+        .melt(id_vars="dependent_var_name",
+              var_name="indicator") \
+        .rename({"dependent_var_name": "dependent_var_modality"},
+                axis=1)\
+        .round({"value": 2})
+    ###############
+    
+    ############# ANOVA
+    from scipy.stats import f_oneway
+    
+    wide_data = [col.dropna() for _, col in
+                 long_data.pivot(index=None,
+                                 columns="dependent_var_name",
+                                 values="independent_var_name").iteritems()]
+    
+    anova = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "indicator": "anova_oneway",
+        "value": f_oneway(*wide_data).pvalue},
+        orient="index",
+    ).transpose()
+    #############
+    
+    ########## MODEL
+    dependent_var_cat = dependent_var.astype(CategoricalDtype(ordered=False))
+    ref_modality_dependent = groupby_stats.loc[lambda df: df["indicator"] == "nonNA_count", :] \
+                                 .loc[lambda df: df["value"] == df["value"].max(), :] \
+                                 .iloc[0, :] \
+        ["dependent_var_modality"]
+    new_levels = [ref_modality_dependent] + pd.CategoricalIndex(dependent_var_cat) \
+        .remove_categories(ref_modality_dependent).categories.tolist()
+    dependent_var_cat.cat.reorder_categories(new_levels, inplace=True)
+    
+    X = independent_var.rename(independent_var_name).to_frame().assign(intercept=1)
+    model = MNLogit(dependent_var_cat, X)
+    results = model.fit()
+    
+    params = results.params
+    params.columns = dependent_var_cat.cat.categories[1:]
+    params = params.rename_axis("dependent_var_modality", axis=1) \
+        .rename_axis("independent_var", axis=0) \
+        .drop("intercept", axis=0) \
+        .melt(var_name="dependent_var_modality") \
+        .assign(indicator="coeffs_LogR")
+    
+    ########### LRT
+    LRT = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "indicator": "pvalue_LRT_LogR",
+        "value": results.llr_pvalue
+    }, orient="index").transpose()
+    
+    ########## pvalues model
+    pvalues = results.pvalues
+    pvalues.columns = dependent_var_cat.cat.categories[1:]
+    pvalues = pvalues.rename_axis("independent_var_name") \
+        .drop("intercept", axis=0) \
+        .reset_index(drop=False) \
+        .melt(id_vars="independent_var_name",
+              var_name="dependent_var_modality") \
+        .assign(indicator="pvalue_coeff_LogR") \
+        .drop("independent_var_name", axis=1)
+    
+    ####### conf int param model
+    conf_int = results.conf_int() \
+                   .reset_index(level=1, drop=False) \
+                   .rename({"level_1": "independent_var_name"}, axis=1) \
+                   .rename_axis("dependent_var_modality", axis=0) \
+                   .loc[lambda df: df["independent_var_name"] != "intercept", :] \
+        .reset_index(drop=False) \
+        .rename({"lower": "coeff_LogR_lb", "upper": "coeff_LogR_ub"}, axis=1) \
+        .melt(id_vars=["dependent_var_modality", "independent_var_name"],
+              value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
+              var_name="indicator") \
+        .drop("independent_var_name", axis=1)
+    multicategorical_continuous = pd.concat([groupby_stats, params, pvalues, conf_int, LRT, anova], axis=0) \
+                                 .assign(ref_modality_dependent=ref_modality_dependent,
+                                         ref_modality_independent=np.NaN,
+                                         independent_var_modality=np.NaN,
+                                         independent_var_name=independent_var_name,
+                                         dependent_var_name=dependent_var_name)
+    return multicategorical_continuous[list_columns_names_export]
 
 
-def placeholder():
+def multicategorical_multicategorical(dependent_var:pd.Series,
+                                      independent_var:pd.Series,
+                                      list_columns_names_export: list):
+    dependent_var_name = dependent_var.name
+    independent_var_name = independent_var.name
+    crosscount = pd.crosstab(index=dependent_var,
+                             columns=independent_var,
+                             margins=True,
+                             margins_name="overall_margin")
+    ref_modality_independent = crosscount.transpose() \
+                                   .loc[
+                               lambda df: df["overall_margin"] == df["overall_margin"].drop("overall_margin").max(), :] \
+        .index[0]
+    independent_dummies = pd.get_dummies(independent_var, drop_first=False) \
+        .drop(ref_modality_independent, axis=1) \
+        .assign(intercept=1)
+    
+    dependent_var_cat = dependent_var.astype(CategoricalDtype(ordered=False))
+    ref_modality_dependent = \
+    crosscount.loc[lambda df: df["overall_margin"] == df["overall_margin"].drop("overall_margin").max(), :] \
+        .index[0]
+    new_levels = [ref_modality_dependent] + pd.CategoricalIndex(dependent_var_cat) \
+        .remove_categories(ref_modality_dependent) \
+        .categories.tolist()
+    dependent_var_cat.cat.reorder_categories(new_levels, inplace=True)
+    
+    # MODEL
+    # model = Logit(dependent_var_cat.cat.codes, independent_dummies)
+    model = MNLogit(dependent_var_cat, independent_dummies)
+    results = model.fit()
+    
+    params = results.params
+    params.columns = dependent_var_cat.cat.categories[1:]
+    params = params.rename_axis("dependent_var_modality") \
+        .drop("intercept", axis=0) \
+        .reset_index(drop=False) \
+        .melt(id_vars="dependent_var_modality",
+              var_name="independent_var_modality") \
+        .assign(indicator="coeffs_LogR")
+    
+    pvalues = results.pvalues
+    pvalues.columns = dependent_var_cat.cat.categories[1:]
+    pvalues = pvalues.rename_axis("dependent_var_modality") \
+        .drop("intercept", axis=0) \
+        .reset_index(drop=False) \
+        .melt(id_vars="dependent_var_modality",
+              var_name="independent_var_modality") \
+        .assign(indicator="pvalue_coeff_LogR") \
+        .round({"independent_var_modality": 2})
+    
+    conf_int = results.conf_int() \
+                   .reset_index(level=1, drop=False) \
+                   .rename({"level_1": "independent_var_modality"}, axis=1) \
+                   .loc[lambda df: df["independent_var_modality"] != "intercept", :] \
+        .rename_axis("dependent_var_modality") \
+        .reset_index(drop=False) \
+        .rename({"lower": "coeff_LogR_lb",
+                 "upper": "coeff_LogR_ub"},
+                axis=1) \
+        .melt(id_vars=["dependent_var_modality", "independent_var_modality"],
+              value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
+              var_name="indicator")
+    
+    LRT = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "independent_var_modality": "overall_margin",
+        "indicator": "pvalue_LRT_LogR",
+        "value": results.llr_pvalue},
+        orient="index",
+    ).transpose()
+    chi2_pvalue = chi2_contingency(crosscount.drop("overall_margin", axis=0) \
+                                   .drop("overall_margin", axis=1))[1]
+    
+    chi2_crosscount = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "independent_var_modality": "overall_margin",
+        "indicator": "pvalue_chisquare_crosscount",
+        "value": chi2_pvalue},
+        orient="index",
+    ).transpose()
+    multicategorical_multicategorical = pd.concat([params, pvalues, conf_int, LRT, chi2_crosscount], axis=0) \
+        .assign(ref_modality_dependent=ref_modality_dependent,
+                ref_modality_independent=ref_modality_independent,
+                independent_var_name=independent_var_name,
+                dependent_var_name=dependent_var_name)
+    return multicategorical_multicategorical[list_columns_names_export]
+
+
+def continuous_multicategorical(dependent_var, independent_var):
+
+    dependent_var_name = dependent_var.name
+    independent_var_name = independent_var.name
+    long_data = pd.DataFrame.from_dict({"dependent_var_name": dependent_var,
+                                        "independent_var_name": independent_var},
+                                       orient="columns")
+
+    groupby_stats = long_data \
+        .groupby("independent_var_name") \
+        .agg(["min", "max", "median", "mean", "count"]) \
+        .droplevel(level=0, axis=1) \
+        .rename({"count": "nonNA_count"}, axis=1) \
+        .reset_index(drop=False) \
+        .melt(id_vars="independent_var_name",
+              var_name="indicator") \
+        .rename({"independent_var_name": "independent_var_modality"},
+                axis=1) \
+        .round({"value": 2})
+    ###############
+
+    ############# ANOVA
+
+    wide_data = [col.dropna() for _, col in
+                 long_data.pivot(index=None,
+                                 columns="independent_var_name",
+                                 values="dependent_var_name").iteritems()]
+
+    anova = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "indicator": "anova_oneway",
+        "value": f_oneway(*wide_data).pvalue},
+        orient="index",
+    ).transpose()
+    #############
+
+    
+    
+    ########## MODEL
+    ref_modality_independent = groupby_stats\
+                               .loc[lambda df: df["indicator"] == "nonNA_count", :]\
+                               .loc[lambda df: df["value"] == df["value"].max(), :]\
+                               .iloc[0, :]\
+                               ["independent_var_modality"]
+    
+    independent_dummies = pd.get_dummies(independent_var, drop_first=False) \
+        .drop(ref_modality_independent, axis=1) \
+        .assign(intercept=1)
+
+    import statsmodels.api as sm
+    
+    model = sm.GLM(dependent_var, independent_dummies, family=sm.families.Binomial())
+    results = model.fit()
+
+    params = results.params
+    params = params\
+        .rename_axis("independent_var_modality", axis=0) \
+        .drop("intercept", axis=0) \
+        .reset_index(drop=False) \
+        .rename_axis()\
+        .rename({0: "value"}, axis=1)\
+        .assign(indicator="coeffs_LogR")
+
+    ########### LRT
+    LRT = pd.DataFrame.from_dict({
+        "dependent_var_modality": "overall_margin",
+        "indicator": "pvalue_LRT_LogR",
+        "value": results.llr_pvalue
+    }, orient="index").transpose()
+
+    ########## pvalues model
+    pvalues = results.pvalues
+    pvalues.columns = dependent_var_cat.cat.categories[1:]
+    pvalues = pvalues.rename_axis("independent_var_name") \
+        .drop("intercept", axis=0) \
+        .reset_index(drop=False) \
+        .melt(id_vars="independent_var_name",
+              var_name="dependent_var_modality") \
+        .assign(indicator="pvalue_coeff_LogR") \
+        .drop("independent_var_name", axis=1)
+
+    ####### conf int param model
+    conf_int = results.conf_int() \
+                   .reset_index(level=1, drop=False) \
+                   .rename({"level_1": "independent_var_name"}, axis=1) \
+                   .rename_axis("dependent_var_modality", axis=0) \
+                   .loc[lambda df: df["independent_var_name"] != "intercept", :] \
+        .reset_index(drop=False) \
+        .rename({"lower": "coeff_LogR_lb", "upper": "coeff_LogR_ub"}, axis=1) \
+        .melt(id_vars=["dependent_var_modality", "independent_var_name"],
+              value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
+              var_name="indicator") \
+        .drop("independent_var_name", axis=1)
+    multicategorical_continuous = pd.concat([groupby_stats, params, pvalues, conf_int, LRT, anova], axis=0) \
+        .assign(ref_modality_dependent=ref_modality_dependent,
+                ref_modality_independent=np.NaN,
+                independent_var_modality=np.NaN,
+                independent_var_name=independent_var_name,
+                dependent_var_name=dependent_var_name)
+    
+    
     return
-
-# def _query_HPDS(variables: list,
-#                 resource,
-#                 qtype="select") -> pd.DataFrame:
-#     query = resource.query()
-#     if qtype == "select":
-#         query.select().add(variables)
-#     else:
-#         raise ValueError("only select implemented right now")
-#     return query.getResultsDataFrame(timeout=60)
-
-
-def _independent_var_selection(subset_variablesDict,
-                               phenotypes=True,
-                               nb_categories: tuple=None, 
-                               ):
-    if phenotypes is True:
-        mask_pheno = subset_variablesDict["HpdsDataType"] == "phenotypes"
-        subset_variablesDict = subset_variablesDict.loc[mask_pheno,:]
-    if nb_categories is not None:
-        mask_modalities = subset_variablesDict["categorical"] == False | subset_variablesDict["nb_modalities"]\
-            .between(*nb_categories, inclusive=True)
-        subset_variablesDict = subset_variablesDict.loc[mask_modalities, :]
-
-    return subset_variablesDict
-
 
 def _LRT(dependent_var_name: str,
         independent_var_names: List[str],
