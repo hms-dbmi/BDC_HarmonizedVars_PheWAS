@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pandas as pd
 import numpy as np
 
@@ -16,7 +14,7 @@ def _replace_null_values(study_df):
     return study_df.replace(["N/A", "null", "NULL", "Null", "nan", "NaN", "NAN"], np.NaN)
 
 
-
+# noinspection PyTypeChecker
 def _quality_checking(study_df: pd.DataFrame,
                       threshold_nonnull_values: int) -> np.array:
     """

@@ -2,13 +2,11 @@ from typing import Union, List
 import re
 
 import pandas as pd
-import numpy as np
 
 import PicSureHpdsLib
 import PicSureBdcAdapter
 import PicSureClient
 
-from python_lib.utils import get_multiIndex_variablesDict
 from env_variables.env_variables import TOKEN, RESOURCE_ID, PICSURE_NETWORK_URL
 
 def get_HPDS_connection(my_token: str = TOKEN,
@@ -139,7 +137,7 @@ def get_whole_dic(resource=None,
     variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
     
     if batch_size is not None:
-        batch_indices = get_batch_groups(variablesDict, batch_size)
+        batch_indices = get_batch_groups(variablesDict, batch_size, False)
         variablesDict["batch_group"] = batch_indices
         with open("./env_variables/batch_list.txt", "w+") as f:
             for line in variablesDict["batch_group"].astype(str).unique().tolist():
@@ -215,21 +213,16 @@ def get_one_study(resource,
 
 
 if __name__ == '__main__':
-    import os
     import pandas as pd
     import numpy as np
     
-    from NHLBI_BioData_Catalyst.python.python_lib.utils import get_multiIndex_variablesDict
+    from env_variables.env_variables import TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID
+    from python_lib.utils import get_multiIndex_variablesDict
     
-    PICSURE_network_URL = "https://biodatacatalyst.integration.hms.harvard.edu/picsure"
-    resource_id = "02e23f52-f354-4e8b-992c-d37c8b9ba140"
-    token_file = "token.txt"
-    with open(token_file, "r") as f:
-        my_token = f.read()
     client = PicSureClient.Client()
-    connection = client.connect(PICSURE_network_URL, my_token)
+    connection = client.connect(PICSURE_NETWORK_URL, TOKEN)
     adapter = PicSureHpdsLib.Adapter(connection)
-    resource = adapter.useResource(resource_id)
+    resource = adapter.useResource(RESOURCE_ID)
     
     # resource = get_HPDS_connection(URL_data, resource_id, my_token)
     plain_variablesDict = resource.dictionary().find("COPDGene").DataFrame()
@@ -241,7 +234,7 @@ if __name__ == '__main__':
     mask_count = variablesDict["observationCount"]
     varnames = variablesDict.loc[mask_cat & mask_count, "name"]
     
-    resource = get_HPDS_connection(token, PICSURE_network_URL, resource_id)
+    resource = get_HPDS_connection(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID)
     df = query_runner(resource,
                       to_select=varnames,
                       to_require=varnames[2],

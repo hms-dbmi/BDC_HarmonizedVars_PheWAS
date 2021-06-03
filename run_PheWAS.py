@@ -1,15 +1,20 @@
 import os
 from argparse import ArgumentParser
 import contextlib
+from datetime import datetime
 
 import json
 import yaml
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
 # from python_lib.associative_statistics import PheWAS
 from python_lib.descriptive_statistics import get_descriptive_statistics
+from python_lib.associative_statistics import associationStatistics
+from scipy.linalg import LinAlgError
+from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 
 class RunPheWAS:
@@ -57,19 +62,19 @@ class RunPheWAS:
                                         result_type="DataFrame",
                                         low_memory=False,
                                         timeout=500)
-                if len(study_df.columns) == 4 | study_df.shape[0] == 0:
+                if len(self.study_df.columns) == 4 | self.study_df.shape[0] == 0:
                     raise ValueError("Data Frame empty, either no matching variable names, or server error")
         return
     
     def quality_checking(self, study_df):
         self.filtered_df = quality_filtering(study_df, self.parameters_exp["Minimum number observations"])
         self.filtered_independent_var_names = list(set(self.filtered_df.columns) - set(self.dependent_var_names))
-        path_results = os.path.join("results/quality_checking", self.phs, str(self.batch_group))
+        path_results = os.path.join("results/quality_checking", self.phs)
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
         pd.DataFrame.from_dict({"variable_name": study_df.columns})\
             .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns))\
-            .to_csv(os.path.join(path_results, "quality_checking.csv"),
+            .to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
                     index=False)
         return
     
@@ -79,56 +84,57 @@ class RunPheWAS:
                           **PheWAS.descriptive_statistics_df.set_index("var_name")["var_type"].drop_duplicates().to_dict()
         }
 
-        path_results = os.path.join("results/descriptive_statistics", self.phs, str(self.batch_group))
+        path_results = os.path.join("results/descriptive_statistics", self.phs)
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
-        self.descriptive_statistics_df.to_csv(os.path.join(path_results, "descriptive_statistics.csv"),
+        self.descriptive_statistics_df.to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
                                          index=False)
         return
-
     
     def association_statistics(self):
-    
-        # TODO: task at hand
-        # Implementing pd.crosstab
-        # deciding whether it is better to keep na when computing these crosstab, and thus would require categorical dtyoe for dependent var
-        # would require to read levels from list_harmonized_vars
-        # would be easy if it is possible to add all the levels at once when creating or modifying a categorical variable
-        # but recovering missing values from the dependent var seems easy, so probably not necessary
-        dic_results = {}
-        
         dic_results_dependent_var = {}
+        dic_logs_dependent_var = {}
         for dependent_var_name in self.dependent_var_names:
-            dependent_var = self.study_df[dependent_var_name]
+            dependent_var = self.study_df[dependent_var_name].astype(CategoricalDtype(ordered=False))
             dic_results_independent_var = {}
+            dic_logs_independent_var = {}
             for independent_var_name in self.independent_var_names:
-                independent_var = self.filtered_df[independent_var_name]
-                if self.var_types[dependent_var_name] == "binary":
-                    pass
-                elif self.var_types[dependent_var_name] == "multicategorical":
-                    if self.var_types[independent_var_name] == "multicategorical":
-                        from python_lib.associative_statistics import multicategorical_multicategorical
-                        dic_results_independent_var[independent_var_name] = multicategorical_multicategorical(dependent_var, independent_var)
-                    elif self.var_types[independent_var_name] == "binary":
-                        dic_results_independent_var[independent_var_name] = run_model(independent_var, dependant_var)
-                    elif self.var_types[independent_var_name] == "continuous":
-                        
-                        normalized_var = normalize(independent_var_name)
-                        dic_results_independent_var[independent_var_name] = run_model(normalized_var, dependant_var)
-                    else:
-                        raise TypeError("var_type should be one of ['multicategorical', 'binary', 'continuous']")
-
-                elif self.var_types[dependent_var_name] == "continuous":
-                    pass
+                independent_var = self.filtered_df[independent_var_name].astype(CategoricalDtype(ordered=False))
+                association_statistics = associationStatistics(dependent_var, independent_var)
+                model = association_statistics.create_model()
+                try:
+                    model.fit()
+                    results = model.results
+                except (LinAlgError, PerfectSeparationError) as exception:
+                    dic_logs_independent_var[independent_var_name] = association_statistics.logs_creating(exception)
+                    association_statistics.creating_empty_df_results()
                 else:
-                    raise TypeError("var_type should be one of ['multicategorical', 'binary', 'continuous']")
-                    
-            dic_results[dependent_var_name] = dic_results_independent_var
-
-        combined_results = combine_results(dic_results)
-        store_results(combined_results, )
+                    dic_logs_independent_var[independent_var_name] = association_statistics.logs_creating()
+                    association_statistics.model_results_handling(results)
+                finally:
+                    dic_results_independent_var[independent_var_name] = association_statistics.gathering_statistics()
+            dic_results_dependent_var[dependent_var_name] = pd.concat(dic_results_independent_var,
+                                                                      axis=0,
+                                                                      ignore_index=True)
+            dic_logs_dependent_var[dependent_var_name] = dic_logs_independent_var
+        df_all_results = pd.concat(dic_results_dependent_var,
+                                axis=0,
+                                ignore_index=True)
         
-        return
+        path_results = os.path.join("results/association_statistics", self.phs)
+        if not os.path.isdir(path_results):
+            os.makedirs(path_results)
+        df_all_results.to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
+                              index=False)
+        dir_logs = os.path.join("results/logs_association_statistics", self.phs)
+        if not os.path.isdir(dir_logs):
+            os.makedirs(dir_logs)
+        path_logs = os.path.join(dir_logs, str(self.batch_group) + ".pickle")
+        with open(path_logs, "w+") as f:
+            json.dump(dic_logs_dependent_var, f)
+        
+        return df_all_results, dic_logs_dependent_var
+
 
 
 if __name__ == '__main__':
@@ -144,6 +150,7 @@ if __name__ == '__main__':
     with open("env_variables/parameters_exp.yaml", "r") as f:
         parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
     
+    print("creation of the object")
     PheWAS = RunPheWAS(TOKEN,
                        PICSURE_NETWORK_URL,
                        RESOURCE_ID,
@@ -151,26 +158,11 @@ if __name__ == '__main__':
                        phs=phs,
                        parameters_exp=parameters_exp
                        )
+    print("querying the data", datetime.now().time())
     PheWAS.querying_data()
+    print("quality checking", datetime.now().time())
     PheWAS.quality_checking(PheWAS.study_df)
+    print("descriptive statistics", datetime.now().time())
     PheWAS.descriptive_statistics()
-    
-    
-    dependent_dic_pvalues = {}
-    dependent_dic_errors = {}
-    #
-    # for dependent_var_name in dependent_var_names:
-    #     print(phs)
-    #     print(dependent_var_name)
-    #     print("entering PheWAS")
-    #     substudy_df = study_df[[dependent_var_name] + study_variables]
-    #     dic_pvalues, dic_errors = PheWAS(substudy_df, dependent_var_name)
-    #     print("PheWAS done")
-    #     dependent_dic_pvalues[dependent_var_name] = dic_pvalues
-    #     dependent_dic_errors[dependent_var_name] = dic_errors
-    #
-    # with open(os.path.join("results", "associations", phs + "_pvalues.json"), "w+") as f:
-    #     json.dump(dependent_dic_pvalues, f)
-    #
-    # with open(os.path.join("results", "associations", phs + "_errors.json"), "w+") as f:
-    #     json.dump(dependent_dic_errors, f)
+    print("association statistics", datetime.now().time())
+    df_all_results, dic_logs_dependent_var = PheWAS.association_statistics()

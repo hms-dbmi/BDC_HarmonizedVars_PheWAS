@@ -10,7 +10,7 @@ def get_multiIndex_variablesDict(variablesDict: pd.DataFrame) -> pd.DataFrame:
         multi_index = pd.MultiIndex.from_tuples(splits)
         return multi_index
 
-    def _get_simplified_varname(variablesDict_index: pd.MultiIndex) -> pd.DataFrame:
+    def _get_simplified_varname(variablesDict_index: pd.MultiIndex) -> list:
         tup_index = variablesDict_index.tolist()
         last_valid_name_list = [[x for x in tup if str(x) != 'nan'][-1] for tup in tup_index]
         return last_valid_name_list
@@ -41,7 +41,9 @@ def get_dic_renaming_vars(variablesDict: pd.DataFrame) -> dict:
 
 def match_dummies_to_varNames(plain_columns: pd.Index,
                              dummies_columns: pd.Index,
-                             columns: list =["simplified_name", "dummies_name"]) -> pd.DataFrame:
+                              columns=None) -> pd.DataFrame:
+    if columns is None:
+        columns = ["simplified_name", "dummies_name"]
     dic_map = {}
     for plain_col in plain_columns:
         dic_map[plain_col] = [dummy_col for dummy_col in dummies_columns if dummy_col.startswith(plain_col)]
