@@ -66,7 +66,7 @@ class RunPheWAS:
                 if len(self.study_df.columns) == 4 | self.study_df.shape[0] == 0:
                     raise ValueError("Data Frame empty, either no matching variable names, or server error")
         return
-    
+        
     def quality_checking(self, study_df):
         self.filtered_df = quality_filtering(study_df, self.parameters_exp["Minimum number observations"])
         self.filtered_independent_var_names = list(set(self.filtered_df.columns) - set(self.dependent_var_names))
@@ -96,11 +96,18 @@ class RunPheWAS:
         dic_results_dependent_var = {}
         dic_logs_dependent_var = {}
         for dependent_var_name in self.dependent_var_names:
-            dependent_var = self.study_df[dependent_var_name].astype(CategoricalDtype(ordered=False))
+            
+            if self.var_types[dependent_var_name] in ["multicategorical", "binary"]:
+                dependent_var = self.study_df[dependent_var_name].astype(CategoricalDtype(ordered=False))
+            else:
+                dependent_var = self.study_df[dependent_var_name]
             dic_results_independent_var = {}
             dic_logs_independent_var = {}
             for independent_var_name in self.independent_var_names:
-                independent_var = self.filtered_df[independent_var_name].astype(CategoricalDtype(ordered=False))
+                if self.var_types[independent_var_name] in ["multicategorical", "binary"]:
+                    independent_var = self.filtered_df[independent_var_name].astype(CategoricalDtype(ordered=False))
+                else:
+                    independent_var = self.filtered_df[independent_var_name]
                 association_statistics = associationStatistics(dependent_var, independent_var)
                 model = association_statistics.create_model()
                 try:
