@@ -2,12 +2,14 @@ from typing import Union, List
 import re
 
 import pandas as pd
+import numpy as np
 
 import PicSureHpdsLib
 import PicSureBdcAdapter
 import PicSureClient
 
 from env_variables.env_variables import TOKEN, RESOURCE_ID, PICSURE_NETWORK_URL
+from python_lib.utils import get_multiIndex_variablesDict
 
 def get_HPDS_connection(my_token: str = TOKEN,
                         URL_data: str = PICSURE_NETWORK_URL,
@@ -90,7 +92,6 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
 
 
 def get_mock_df(resource=None):
-    from python_lib.utils import get_multiIndex_variablesDict
     if resource is None:
         with open("token.txt", "r") as f:
             token = f.read()
@@ -213,11 +214,6 @@ def get_one_study(resource,
 
 
 if __name__ == '__main__':
-    import pandas as pd
-    import numpy as np
-    
-    from env_variables.env_variables import TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID
-    from python_lib.utils import get_multiIndex_variablesDict
     
     client = PicSureClient.Client()
     connection = client.connect(PICSURE_NETWORK_URL, TOKEN)
