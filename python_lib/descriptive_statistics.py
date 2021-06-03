@@ -42,14 +42,6 @@ def get_descriptive_statistics(filtered_df, filtered_independent_var_names):
               value_name="value") \
         .assign(var_type="continuous")
     
-    # non_null_values = filtered_df[filtered_independent_var_names].notnull().sum() \
-    #     .rename("value") \
-    #     .to_frame() \
-    #     .rename_axis("var_name") \
-    #     .reset_index(drop=False) \
-    #     .assign(statistic="non_null_values",
-    #             categorical=(filtered_df.dtypes == "O").values)
-    #
     descriptive_statistics_df = pd.concat(
         [categorical_statistics, mean_median],
         ignore_index=True

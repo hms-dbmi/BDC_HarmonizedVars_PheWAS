@@ -6,7 +6,6 @@ from statsmodels.regression.linear_model import OLS
 from scipy.stats import chi2_contingency, f_oneway, pearsonr, spearmanr
 
 
-# TODO: implementing statistical model handling
 # TODO: handling the situations where value count inf to 5, discard variables automatically
 
 list_columns_names_export = [
