@@ -158,28 +158,34 @@ class associationStatistics():
     
     
     def create_model(self):
-        if hasattr(self.independent_var, 'cat'):
-            X = self.independent_var.to_frame().assign(intercept=1)
-        else:
-            self.ref_modality_independent = self.independent_var.loc[self.dependent_var.notnull()].value_counts() \
+        def _get_ref_modality(variable):
+            ref_modality = variable.value_counts() \
                 .loc[lambda serie: serie == serie.max()] \
                 .index[0]
-            new_levels = [self.ref_modality_independent] + pd.CategoricalIndex(self.independent_var) \
-                .remove_categories(self.ref_modality_independent) \
+            return ref_modality
+        
+        def _change_ref_modality_variable(variable, ref_modality):
+            new_levels = [ref_modality] + pd.CategoricalIndex(variable) \
+                .remove_categories(ref_modality) \
                 .categories.tolist()
-            self.independent_var.cat.reorder_categories(new_levels, inplace=True)
+            variable.cat = variable.cat.reorder_categories(new_levels)
+            return variable
+        
+        mask_na = ~pd.concat([self.dependent_var, self.independent_var], axis=1).isna().any(axis=1)
+        if hasattr(self.independent_var, 'cat'):
+            self.ref_modality_independent = _get_ref_modality(self.independent_var[mask_na])
+            self.independent_var = _change_ref_modality_variable(self.independent_var, self.ref_modality_independent)
             X = pd.get_dummies(self.independent_var.astype(str), drop_first=False) \
                 .drop(self.ref_modality_independent, axis=1) \
                 .assign(intercept=1)
-        if hasattr(self.dependent_var, 'cat'):
-            self.ref_modality_dependent = self.dependent_var.value_counts().loc[lambda serie: serie == serie.max()].index[0]
-            new_levels = [self.ref_modality_dependent] + pd.CategoricalIndex(self.dependent_var) \
-                .remove_categories(self.ref_modality_dependent) \
-                .categories.tolist()
-            self.dependent_var.cat.reorder_categories(new_levels, inplace=True)
-            return MNLogit(self.dependent_var, X)
         else:
-            return OLS(self.dependent_var, X)
+            X = self.independent_var.to_frame().assign(intercept=1)
+        if hasattr(self.dependent_var, 'cat'):
+            self.ref_modality_dependent = _get_ref_modality(self.dependent_var[mask_na])
+            self.dependent_var = _change_ref_modality_variable(self.dependent_var, self.ref_modality_dependent)
+            return MNLogit(self.dependent_var[mask_na], X[mask_na])
+        else:
+            return OLS(self.dependent_var[mask_na], X[mask_na])
         
         
     def model_results_handling(self, results):
