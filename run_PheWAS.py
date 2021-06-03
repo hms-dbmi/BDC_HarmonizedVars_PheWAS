@@ -10,7 +10,6 @@ from pandas.api.types import CategoricalDtype
 
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
-# from python_lib.associative_statistics import PheWAS
 from python_lib.descriptive_statistics import get_descriptive_statistics
 from python_lib.associative_statistics import associationStatistics
 from scipy.linalg import LinAlgError
