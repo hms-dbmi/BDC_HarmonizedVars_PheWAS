@@ -35,10 +35,12 @@ class RunPheWAS:
         self.filtered_df = None
         eligible_variables = pd.read_csv("env_variables/list_eligible_variables.csv")
         list_harmonized_variables = pd.read_csv("env_variables/list_harmonized_variables.csv")
-        if self.parameters_exp["variable_types"] is True:
+        if self.parameters_exp["harmonized_variables_types"] == "categorical":
             self.dependent_var_names = list_harmonized_variables.loc[lambda df: df["categorical"] == True, "name"].tolist()
-        else:
+        elif self.parameters_exp["harmonized_variables_types"] == "all":
             self.dependent_var_names = list_harmonized_variables.loc[:, "name"].tolist()
+        else:
+            raise ValueError("harmonized_variables_types should be either 'categorical' or 'all'")
 
         self.independent_var_names = eligible_variables.loc[lambda df: (df["phs"] == phs) & \
                                                                        (df["batch_group"] == batch_group),

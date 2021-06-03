@@ -78,7 +78,7 @@ harmonized_variables_dictionary.join(variables_type_df, on="name") \
 parameters = {
     "univariate": True,
     "Minimum number observations": 5,
-    "harmonized_variable_types": "categorical"
+    "harmonized_variables_types": "all"
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:
     yaml.dump(parameters, f)
