@@ -32,6 +32,9 @@ subset_variables_dictionary.reset_index("level_0", drop=False)\
     .loc[:, ["study", "phs", "batch_group", "name"]]\
     .to_csv("env_variables/list_eligible_variables.csv", index=False)
 
+subset_variables_dictionary[["phs", "batch_group"]].drop_duplicates()\
+    .to_csv("env_variables/list_phs_batchgroup.csv", index=False)
+
 renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmonized_variables_manual.csv")\
     .loc[lambda df: df["renaming_variables"].notnull(), :]\
     .set_index("harmonized_complete_name")
