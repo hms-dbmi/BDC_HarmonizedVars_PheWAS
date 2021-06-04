@@ -20,6 +20,10 @@ list_columns_names_export = [
 ]
 
 
+class EndogOrExogUnique(Exception):
+    """Raised when either the dependent or the independent variable are all NaN after removing NaN"""
+    pass
+
 class associationStatistics():
     
     def __init__(self,
@@ -168,13 +172,16 @@ class associationStatistics():
             new_levels = [ref_modality] + pd.CategoricalIndex(variable) \
                 .remove_categories(ref_modality) \
                 .categories.tolist()
-            variable.cat = variable.cat.reorder_categories(new_levels)
+            variable.cat = pd.CategoricalIndex(variable).reorder_categories(new_levels)
             return variable
         
         mask_na = ~pd.concat([self.dependent_var, self.independent_var], axis=1).isna().any(axis=1)
+        if (len(self.dependent_var[mask_na].unique()) <= 1) | (len(self.independent_var[mask_na].unique()) <= 1):
+            raise EndogOrExogUnique
+
         if hasattr(self.independent_var, 'cat'):
             self.ref_modality_independent = _get_ref_modality(self.independent_var[mask_na])
-            self.independent_var = _change_ref_modality_variable(self.independent_var, self.ref_modality_independent)
+            _change_ref_modality_variable(self.independent_var, self.ref_modality_independent)
             X = pd.get_dummies(self.independent_var.astype(str), drop_first=False) \
                 .drop(self.ref_modality_independent, axis=1) \
                 .assign(intercept=1)
@@ -231,13 +238,6 @@ class associationStatistics():
                 "value": results.llr_pvalue},
                 orient="index",
             ).transpose()
-            multicategorical_multicategorical_df = pd.concat(self.list_df_results_statistics,
-                                                             axis=0,
-                                                             ignore_index=True) \
-                .assign(ref_modality_dependent=self.ref_modality_dependent,
-                        ref_modality_independent=self.ref_modality_independent,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
         
         elif self.association_type == "categorical_continuous":
             params = results.params
@@ -278,14 +278,6 @@ class associationStatistics():
                       value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
                       var_name="indicator") \
                 .drop("independent_var_name", axis=1)
-            output_model_df = pd.concat(self.list_df_results_statistics,
-                                                    axis=0,
-                                                    ignore_index=True) \
-                .assign(ref_modality_dependent=self.ref_modality_dependent,
-                        ref_modality_independent=np.NaN,
-                        independent_var_modality=np.NaN,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
         elif self.association_type == "continuous_categorical":
             ########## MODEL
             params = results.params
@@ -297,7 +289,7 @@ class associationStatistics():
                 .assign(indicator="coeff_LR")
     
             ########### LRT
-            llr_pvalue = results.compare_lr_test(OLS(self.dependent_var, np.ones_like(self.independent_var)).fit())[1]
+            llr_pvalue = results.compare_lr_test(OLS(results.model.endog, np.ones_like(results.model.endog)).fit())[1]
             self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
                 "independent_var_modality": "overall_margin",
                 "indicator": "pvalue_LRT_LR",
@@ -323,55 +315,44 @@ class associationStatistics():
                 .melt(id_vars="independent_var_modality",
                       value_vars=["coeff_LR_lb", "coeff_LR_ub"],
                       var_name="indicator")
-    
-            output_model_df = pd.concat(self.list_df_results_statistics,
-                                                       axis=0,
-                                                       ignore_index=True) \
-                .assign(ref_modality_dependent=np.NaN,
-                        dependent_var_modality=np.NaN,
-                        ref_modality_independent=self.ref_modality_independent,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
         else:
-            llr_pvalue = results.compare_lr_test(OLS(self.dependent_var, np.ones_like(self.independent_var)).fit())[1]
+            print(self.association_type)
+            print(self.dependent_var)
+            print(self.dependent_var.dtype)
+            print(self.independent_var)
+            print(self.independent_var.dtype)
+            print(" in continuous_continuous")
+            llr_pvalue = results.compare_lr_test(OLS(results.model.endog, np.ones_like(results.model.endog)).fit())[1]
             self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
                 "independent_var_modality": "overall_margin",
                 "indicator": "pvalue_LRT_LR",
                 "value": llr_pvalue
             }, orient="index") \
                 .transpose()
-        self.list_df_results_statistics["params"] = results.params \
-            .to_frame() \
-            .drop("intercept") \
-            .rename({0: "value"}, axis=1) \
-            .assign(indicator="coeff_LR") \
-            .reset_index(drop=True)
-
-        self.list_df_results_statistics["conf_int"] = results.conf_int() \
-            .drop("intercept", axis=0) \
-            .rename({0: "coeff_LR_lb",
-                     1: "coeff_LR_ub"}, axis=1) \
-            .melt(value_vars=["coeff_LR_lb", "coeff_LR_ub"],
-                  var_name="indicator")
-
-        self.list_df_results_statistics["pvalues"] = results.pvalues \
-            .drop("intercept") \
-            .to_frame() \
-            .rename({0: "value"}, axis=1) \
-            .assign(indicator="pvalue_coeff_LR") \
-            .reset_index(drop=True)
-        continuous_continuous_df = pd.concat(self.list_df_results_statistics,
-                                             axis=0,
-                                             ignore_index=True) \
-            .assign(ref_modality_dependent=np.NaN,
-                    dependent_var_modality=np.NaN,
-                    ref_modality_independent=np.NaN,
-                    independent_var_modality=np.NaN,
-                    independent_var_name=self.independent_var.name,
-                    dependent_var_name=self.dependent_var.name)
+            self.list_df_results_statistics["params"] = results.params \
+                .to_frame() \
+                .drop("intercept") \
+                .rename({0: "value"}, axis=1) \
+                .assign(indicator="coeff_LR") \
+                .reset_index(drop=True)
+    
+            self.list_df_results_statistics["conf_int"] = results.conf_int() \
+                .drop("intercept", axis=0) \
+                .rename({0: "coeff_LR_lb",
+                         1: "coeff_LR_ub"}, axis=1) \
+                .melt(value_vars=["coeff_LR_lb", "coeff_LR_ub"],
+                      var_name="indicator")
+    
+            self.list_df_results_statistics["pvalues"] = results.pvalues \
+                .drop("intercept") \
+                .to_frame() \
+                .rename({0: "value"}, axis=1) \
+                .assign(indicator="pvalue_coeff_LR") \
+                .reset_index(drop=True)
         return
 
     def creating_empty_df_results(self):
+        
         if hasattr(self.dependent_var, 'cat'):
             if hasattr(self.independent_var, 'cat'):
                 list_indicators = [
@@ -433,7 +414,7 @@ class associationStatistics():
                     "indicator": list_indicators,
                     "value": np.NaN,
                 })
-            self.list_df_results_statistics["null_results"] = null_results
+        self.list_df_results_statistics["null_results"] = null_results
         return
 
     def gathering_statistics(self):

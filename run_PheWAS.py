@@ -11,7 +11,7 @@ from pandas.api.types import CategoricalDtype
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
 from python_lib.descriptive_statistics import get_descriptive_statistics
-from python_lib.associative_statistics import associationStatistics
+from python_lib.associative_statistics import associationStatistics, EndogOrExogUnique
 from scipy.linalg import LinAlgError
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
@@ -45,7 +45,10 @@ class RunPheWAS:
         self.independent_var_names = eligible_variables.loc[lambda df: (df["phs"] == phs) & \
                                                                        (df["batch_group"] == batch_group),
                                                             "name"]
-        self.var_types = list_harmonized_variables.set_index("name")["var_type"].drop_duplicates().to_dict()
+        self.var_types = list_harmonized_variables[["var_type", "name"]]\
+            .drop_duplicates()\
+            .set_index("name")["var_type"]\
+            .to_dict()
         self.study_df = None
         self.filtered_independent_var_names = None
         self.descriptive_statistics_df = None
@@ -67,13 +70,13 @@ class RunPheWAS:
                     raise ValueError("Data Frame empty, either no matching variable names, or server error")
         return
         
-    def quality_checking(self, study_df):
-        self.filtered_df = quality_filtering(study_df, self.parameters_exp["Minimum number observations"])
+    def quality_checking(self):
+        self.filtered_df = quality_filtering(self.study_df, self.parameters_exp["Minimum number observations"])
         self.filtered_independent_var_names = list(set(self.filtered_df.columns) - set(self.dependent_var_names))
         path_results = os.path.join("results/quality_checking", self.phs)
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
-        pd.DataFrame.from_dict({"variable_name": study_df.columns})\
+        pd.DataFrame.from_dict({"variable_name": self.study_df.columns})\
             .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns))\
             .to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
                     index=False)
@@ -81,8 +84,12 @@ class RunPheWAS:
     
     def descriptive_statistics(self):
         self.descriptive_statistics_df = get_descriptive_statistics(self.filtered_df, self.filtered_independent_var_names)
+        independent_var_types = self.descriptive_statistics_df[["var_name", "var_type"]]\
+            .drop_duplicates()\
+            .set_index("var_name")["var_type"]\
+            .to_dict()
         self.var_types = {**self.var_types,
-                          **PheWAS.descriptive_statistics_df.set_index("var_name")["var_type"].drop_duplicates().to_dict()
+                          **independent_var_types
         }
 
         path_results = os.path.join("results/descriptive_statistics", self.phs)
@@ -96,31 +103,30 @@ class RunPheWAS:
         dic_results_dependent_var = {}
         dic_logs_dependent_var = {}
         for dependent_var_name in self.dependent_var_names:
-            
             if self.var_types[dependent_var_name] in ["multicategorical", "binary"]:
                 dependent_var = self.study_df[dependent_var_name].astype(CategoricalDtype(ordered=False))
             else:
                 dependent_var = self.study_df[dependent_var_name]
             dic_results_independent_var = {}
             dic_logs_independent_var = {}
-            for independent_var_name in self.independent_var_names:
+            for independent_var_name in self.filtered_independent_var_names:
+                print(independent_var_name)
                 if self.var_types[independent_var_name] in ["multicategorical", "binary"]:
                     independent_var = self.filtered_df[independent_var_name].astype(CategoricalDtype(ordered=False))
                 else:
                     independent_var = self.filtered_df[independent_var_name]
-                association_statistics = associationStatistics(dependent_var, independent_var)
-                model = association_statistics.create_model()
+                association_statistics_instance = associationStatistics(dependent_var, independent_var)
                 try:
-                    model.fit()
-                    results = model.results
-                except (LinAlgError, PerfectSeparationError) as exception:
-                    dic_logs_independent_var[independent_var_name] = association_statistics.logs_creating(exception)
-                    association_statistics.creating_empty_df_results()
+                    model = association_statistics_instance.create_model()
+                    results = model.fit()
+                except (LinAlgError, PerfectSeparationError, EndogOrExogUnique) as exception:
+                    dic_logs_independent_var[independent_var_name] = association_statistics_instance.logs_creating(exception)
+                    association_statistics_instance.creating_empty_df_results()
                 else:
-                    dic_logs_independent_var[independent_var_name] = association_statistics.logs_creating()
-                    association_statistics.model_results_handling(results)
+                    dic_logs_independent_var[independent_var_name] = association_statistics_instance.logs_creating()
+                    association_statistics_instance.model_results_handling(results)
                 finally:
-                    dic_results_independent_var[independent_var_name] = association_statistics.gathering_statistics()
+                    dic_results_independent_var[independent_var_name] = association_statistics_instance.gathering_statistics()
             dic_results_dependent_var[dependent_var_name] = pd.concat(dic_results_independent_var,
                                                                       axis=0,
                                                                       ignore_index=True)
@@ -169,7 +175,7 @@ if __name__ == '__main__':
     print("querying the data", datetime.now().time())
     PheWAS.querying_data()
     print("quality checking", datetime.now().time())
-    PheWAS.quality_checking(PheWAS.study_df)
+    PheWAS.quality_checking()
     print("descriptive statistics", datetime.now().time())
     PheWAS.descriptive_statistics()
     print("association statistics", datetime.now().time())
