@@ -21,78 +21,106 @@ list_columns_names_export = [
 
 
 class EndogOrExogUnique(Exception):
-    """Raised when either the dependent or the independent variable are all NaN after removing NaN"""
-    pass
+    """Raised when either the dependent or the independent variable are
+             all NaN after removing NaN"""
+
+class CrossCountThreshold(Exception):
+    """Raised when the marginal crosscount of non null values is below the
+             specified value in parameters"""
+
 
 class associationStatistics():
     
     def __init__(self,
                  dependent_var: pd.Series,
-                 independent_var: pd.Series):
+                 independent_var: pd.Series,
+                 threshold_crosscount: int):
         self.dependent_var = dependent_var
         self.independent_var = independent_var
         if hasattr(self.dependent_var, 'cat'):
-            if hasattr(self.independent_var, 'cat'):
-                self.association_type = "categorical_categorical"
-                self.ref_modality_dependent = None
-                self.ref_modality_independent = None
-            else:
-                self.ref_modality_dependent = None
-                self.association_type = "categorical_continuous"
-        else:
-            if hasattr(self.independent_var, 'cat'):
-                self.association_type = "continuous_categorical"
-                self.ref_modality_independent = None
-            else:
-                self.association_type = "continuous_continuous"
+            self.ref_modality_dependent = None
+        if hasattr(self.independent_var, 'cat'):
+            self.ref_modality_independent = None
+        self.threshold_crosscount = threshold_crosscount
         self.list_df_results_statistics = {}
         self.logs = []
     
+    def data_management(self):
+
+        def _get_ref_modality(variable):
+            ref_modality = variable.value_counts() \
+                .loc[lambda serie: serie == serie.max()] \
+                .index[0]
+            return ref_modality
+
+        def _change_ref_modality_variable(variable, ref_modality):
+            new_levels = [ref_modality] + pd.CategoricalIndex(variable) \
+                .remove_categories(ref_modality) \
+                .categories.tolist()
+            variable.cat = pd.CategoricalIndex(variable).reorder_categories(new_levels)
+            return variable
+        mask_non_na = ~pd.concat([self.dependent_var, self.independent_var], axis=1).isna().any(axis=1)
+        self.dependent_var = self.dependent_var[mask_non_na]
+        self.independent_var = self.independent_var[mask_non_na]
+        if (len(self.dependent_var) <= self.threshold_crosscount) | (len(self.independent_var) <= self.threshold_crosscount):
+            raise CrossCountThreshold
+        if hasattr(self.independent_var, 'cat'):
+            self.independent_var = self.independent_var.cat.remove_unused_categories()
+            self.ref_modality_independent = _get_ref_modality(self.independent_var)
+            self.independent_var = _change_ref_modality_variable(self.independent_var, self.ref_modality_independent)
+        if hasattr(self.dependent_var, 'cat'):
+            self.dependent_var = self.dependent_var.cat.remove_unused_categories()
+            self.ref_modality_dependent = _get_ref_modality(self.dependent_var)
+            self.dependent_var = _change_ref_modality_variable(self.dependent_var, self.ref_modality_dependent)
+        return
+    
     def groupby_statistics(self):
-        if self.association_type == "categorical_categorical":
-            groupby_stats = pd.crosstab(index=self.dependent_var,
-                                     columns=self.independent_var,
-                                     margins=True,
-                                     margins_name="overall_margin") \
-                .rename_axis("dependent_var_modality", axis=0) \
-                .reset_index(drop=False) \
-                .melt(id_vars="dependent_var_modality",
-                      var_name="independent_var_modality") \
-                .assign(indicator="nonNA_count")
-        elif self.association_type == "categorical_continuous":
-            groupby_stats = pd.DataFrame.from_dict({"dependent_var_name": self.dependent_var,
-                                        "independent_var_name": self.independent_var},
-                                       orient="columns") \
-                .groupby("dependent_var_name") \
-                .agg(["min", "max", "median", "mean", "count"]) \
-                .droplevel(level=0, axis=1) \
-                .rename({"count": "nonNA_count"}, axis=1) \
-                .reset_index(drop=False) \
-                .melt(id_vars="dependent_var_name",
-                      var_name="indicator") \
-                .rename({"dependent_var_name": "dependent_var_modality"},
-                        axis=1)
-            self.list_df_results_statistics["groupby_stats"] = groupby_stats
-        elif self.association_type == "continuous_categorical":
-            groupby_stats = pd.DataFrame.from_dict({
-                    "dependent_var": self.dependent_var,
-                    "independent_var": self.independent_var},
-                    orient="columns") \
-                .groupby("independent_var") \
-                .agg(["min", "max", "median", "mean", "count"]) \
-                .droplevel(level=0, axis=1) \
-                .rename({"count": "nonNA_count"}, axis=1) \
-                .reset_index(drop=False) \
-                .melt(id_vars="independent_var",
-                      var_name="indicator") \
-                .rename({"independent_var": "independent_var_modality"},
-                        axis=1)
+        if hasattr(self.dependent_var, 'cat'):
+            if hasattr(self.independent_var, 'cat'):
+                groupby_stats = pd.crosstab(index=self.dependent_var,
+                                         columns=self.independent_var,
+                                         margins=True,
+                                         margins_name="overall_margin") \
+                    .rename_axis("dependent_var_modality", axis=0) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="dependent_var_modality",
+                          var_name="independent_var_modality") \
+                    .assign(indicator="nonNA_count")
+            else:
+                groupby_stats = pd.DataFrame.from_dict({"dependent_var_name": self.dependent_var,
+                                            "independent_var_name": self.independent_var},
+                                           orient="columns") \
+                    .groupby("dependent_var_name") \
+                    .agg(["min", "max", "median", "mean", "count"]) \
+                    .droplevel(level=0, axis=1) \
+                    .rename({"count": "nonNA_count"}, axis=1) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="dependent_var_name",
+                          var_name="indicator") \
+                    .rename({"dependent_var_name": "dependent_var_modality"},
+                            axis=1)
+                self.list_df_results_statistics["groupby_stats"] = groupby_stats
         else:
-            groupby_stats = self.dependent_var\
-                .agg(["min", "max", "std", "mean", "median", "count"])\
-                .rename("value")\
-                .rename_axis("indicator", axis=0)\
-                .reset_index()
+            if hasattr(self.independent_var, 'cat'):
+                groupby_stats = pd.DataFrame.from_dict({
+                        "dependent_var": self.dependent_var,
+                        "independent_var": self.independent_var},
+                        orient="columns") \
+                    .groupby("independent_var") \
+                    .agg(["min", "max", "median", "mean", "count"]) \
+                    .droplevel(level=0, axis=1) \
+                    .rename({"count": "nonNA_count"}, axis=1) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="independent_var",
+                          var_name="indicator") \
+                    .rename({"independent_var": "independent_var_modality"},
+                            axis=1)
+            else:
+                groupby_stats = self.dependent_var\
+                    .agg(["min", "max", "std", "mean", "median", "count"])\
+                    .rename("value")\
+                    .rename_axis("indicator", axis=0)\
+                    .reset_index()
         self.list_df_results_statistics["groupby_stats"] = groupby_stats
     
     
@@ -157,198 +185,154 @@ class associationStatistics():
                     "pvalue_spearman": spearman[1]
                 }).reset_index(drop=False) \
                     .rename({"index": "indicator", 0: "value"}, axis=1)
-
         return
     
-    
     def create_model(self):
-        def _get_ref_modality(variable):
-            ref_modality = variable.value_counts() \
-                .loc[lambda serie: serie == serie.max()] \
-                .index[0]
-            return ref_modality
-        
-        def _change_ref_modality_variable(variable, ref_modality):
-            new_levels = [ref_modality] + pd.CategoricalIndex(variable) \
-                .remove_categories(ref_modality) \
-                .categories.tolist()
-            variable.cat = pd.CategoricalIndex(variable).reorder_categories(new_levels)
-            return variable
-        
-        mask_na = ~pd.concat([self.dependent_var, self.independent_var], axis=1).isna().any(axis=1)
-        if (len(self.dependent_var[mask_na].unique()) <= 1) | (len(self.independent_var[mask_na].unique()) <= 1):
+        if (len(self.dependent_var.unique()) <= self.threshold_crosscount) | (len(self.independent_var.unique()) <= self.threshold_crosscount):
             raise EndogOrExogUnique
-
         if hasattr(self.independent_var, 'cat'):
-            self.ref_modality_independent = _get_ref_modality(self.independent_var[mask_na])
-            _change_ref_modality_variable(self.independent_var, self.ref_modality_independent)
             X = pd.get_dummies(self.independent_var.astype(str), drop_first=False) \
                 .drop(self.ref_modality_independent, axis=1) \
                 .assign(intercept=1)
         else:
             X = self.independent_var.to_frame().assign(intercept=1)
         if hasattr(self.dependent_var, 'cat'):
-            self.ref_modality_dependent = _get_ref_modality(self.dependent_var[mask_na])
-            self.dependent_var = _change_ref_modality_variable(self.dependent_var, self.ref_modality_dependent)
-            return MNLogit(self.dependent_var[mask_na], X[mask_na])
+            y = self.dependent_var.cat.codes.values
+            return MNLogit(y, X)
         else:
-            return OLS(self.dependent_var[mask_na], X[mask_na])
+            y = self.dependent_var
+            return OLS(y, X)
         
         
     def model_results_handling(self, results):
-        if self.association_type == "categorical_categorical":
-    
+        params = results.params
+        pvalues = results.pvalues
+        if hasattr(self.dependent_var, "cat"):
             dependent_variable_modalities = self.dependent_var.cat.categories.drop(self.ref_modality_dependent)
-            
-            params = results.params
             params.columns = dependent_variable_modalities
-            self.list_df_results_statistics["params"] = params.rename_axis("dependent_var_modality") \
-                .drop("intercept", axis=0) \
-                .reset_index(drop=False) \
-                .melt(id_vars="dependent_var_modality",
-                      var_name="independent_var_modality") \
-                .assign(indicator="coeff_LogR")
-    
-            pvalues = results.pvalues
             pvalues.columns = dependent_variable_modalities
-            self.list_df_results_statistics["pvalues"] = pvalues.rename_axis("dependent_var_modality", axis=0) \
-                .drop("intercept", axis=0) \
-                .reset_index(drop=False) \
-                .melt(id_vars="dependent_var_modality",
-                      var_name="independent_var_modality") \
-                .assign(indicator="pvalue_coeff_LogR")
-    
-            self.list_df_results_statistics["conf_int"] = results.conf_int() \
-                           .reset_index(level=1, drop=False) \
-                           .rename({"level_1": "independent_var_modality"}, axis=1) \
-                           .loc[lambda df: df["independent_var_modality"] != "intercept", :] \
-                .rename_axis("dependent_var_modality") \
-                .reset_index(drop=False) \
-                .rename({"lower": "coeff_LogR_lb",
-                         "upper": "coeff_LogR_ub"},
-                        axis=1) \
-                .melt(id_vars=["dependent_var_modality", "independent_var_modality"],
-                      value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
-                      var_name="indicator")
-    
-            self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
-                "dependent_var_modality": "overall_margin",
-                "independent_var_modality": "overall_margin",
-                "indicator": "pvalue_LRT_LogR",
-                "value": results.llr_pvalue},
-                orient="index",
-            ).transpose()
-        
-        elif self.association_type == "categorical_continuous":
-            params = results.params
-            params.columns = self.dependent_var.cat.categories[1:]
-            self.list_df_results_statistics["params"] = params.rename_axis("dependent_var_modality", axis=1) \
-                .rename_axis("independent_var", axis=0) \
-                .drop("intercept", axis=0) \
-                .melt(var_name="dependent_var_modality") \
-                .assign(indicator="coeff_LogR")
-    
-            ########### LRT
-            self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
-                "dependent_var_modality": "overall_margin",
-                "indicator": "pvalue_LRT_LogR",
-                "value": results.llr_pvalue
-            }, orient="index").transpose()
-    
-            ########## pvalues model
-            pvalues = results.pvalues
-            pvalues.columns = self.dependent_var.cat.categories[1:]
-            self.list_df_results_statistics["LRT"] = pvalues.rename_axis("independent_var_name") \
-                .drop("intercept", axis=0) \
-                .reset_index(drop=False) \
-                .melt(id_vars="independent_var_name",
-                      var_name="dependent_var_modality") \
-                .assign(indicator="pvalue_coeff_LogR") \
-                .drop("independent_var_name", axis=1)
-    
-            ####### conf int param model
-            self.list_df_results_statistics["conf_int"] = results.conf_int() \
-                           .reset_index(level=1, drop=False) \
-                           .rename({"level_1": "independent_var_name"}, axis=1) \
-                           .rename_axis("dependent_var_modality", axis=0) \
-                           .loc[lambda df: df["independent_var_name"] != "intercept", :] \
-                .reset_index(drop=False) \
-                .rename({"lower": "coeff_LogR_lb", "upper": "coeff_LogR_ub"}, axis=1) \
-                .melt(id_vars=["dependent_var_modality", "independent_var_name"],
-                      value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
-                      var_name="indicator") \
-                .drop("independent_var_name", axis=1)
-        elif self.association_type == "continuous_categorical":
-            ########## MODEL
-            params = results.params
-            self.list_df_results_statistics["params"] = params \
-                .rename_axis("independent_var_modality", axis=0) \
-                .drop("intercept", axis=0) \
-                .reset_index(drop=False) \
-                .rename({0: "value"}, axis=1) \
-                .assign(indicator="coeff_LR")
-    
-            ########### LRT
-            llr_pvalue = results.compare_lr_test(OLS(results.model.endog, np.ones_like(results.model.endog)).fit())[1]
-            self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
-                "independent_var_modality": "overall_margin",
-                "indicator": "pvalue_LRT_LR",
-                "value": llr_pvalue
-            }, orient="index") \
-                .transpose()
-    
-            ########## pvalues model
-            pvalues = results.pvalues
-            pvalues = pvalues.rename_axis("independent_var_modality") \
-                .rename("value") \
-                .drop("intercept", axis=0) \
-                .reset_index(drop=False) \
-                .assign(indicator="pvalue_coeff_LR")
-    
-            ####### conf int param model
-            self.list_df_results_statistics["conf_int"] = results.conf_int() \
-                                                              .reset_index(drop=False) \
-                                                              .rename({"index": "independent_var_modality",
-                                                                       0: "coeff_LR_lb",
-                                                                       1: "coeff_LR_ub"}, axis=1) \
-                                                              .loc[lambda df: df["independent_var_modality"] != "intercept", :] \
-                .melt(id_vars="independent_var_modality",
-                      value_vars=["coeff_LR_lb", "coeff_LR_ub"],
-                      var_name="indicator")
+            if hasattr(self.independent_var, "cat"):
+                self.list_df_results_statistics["params"] = params.rename_axis("dependent_var_modality") \
+                    .drop("intercept", axis=0) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="dependent_var_modality",
+                          var_name="independent_var_modality") \
+                    .assign(indicator="coeff_LogR")
+                self.list_df_results_statistics["pvalues"] = pvalues.rename_axis("dependent_var_modality", axis=0) \
+                    .drop("intercept", axis=0) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="dependent_var_modality",
+                          var_name="independent_var_modality") \
+                    .assign(indicator="pvalue_coeff_LogR")
+                self.list_df_results_statistics["conf_int"] = results.conf_int() \
+                               .reset_index(level=1, drop=False) \
+                               .rename({"level_1": "independent_var_modality"}, axis=1) \
+                               .loc[lambda df: df["independent_var_modality"] != "intercept", :] \
+                    .rename_axis("dependent_var_modality") \
+                    .reset_index(drop=False) \
+                    .rename({"lower": "coeff_LogR_lb",
+                             "upper": "coeff_LogR_ub"},
+                            axis=1) \
+                    .melt(id_vars=["dependent_var_modality", "independent_var_modality"],
+                          value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
+                          var_name="indicator")
+                self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
+                    "dependent_var_modality": "overall_margin",
+                    "independent_var_modality": "overall_margin",
+                    "indicator": "pvalue_LRT_LogR",
+                    "value": results.llr_pvalue},
+                    orient="index",
+                ).transpose()
+            else:
+                self.list_df_results_statistics["params"] = params.rename_axis("dependent_var_modality", axis=1) \
+                    .rename_axis("independent_var", axis=0) \
+                    .drop("intercept", axis=0) \
+                    .melt(var_name="dependent_var_modality") \
+                    .assign(indicator="coeff_LogR")
+                ########## pvalues model
+                self.list_df_results_statistics["pvalues"] = pvalues.rename_axis("independent_var_name") \
+                    .drop("intercept", axis=0) \
+                    .reset_index(drop=False) \
+                    .melt(id_vars="independent_var_name",
+                          var_name="dependent_var_modality") \
+                    .assign(indicator="pvalue_coeff_LogR") \
+                    .drop("independent_var_name", axis=1)
+                ####### conf int param model
+                self.list_df_results_statistics["conf_int"] = results.conf_int() \
+                               .reset_index(level=1, drop=False) \
+                               .rename({"level_1": "independent_var_name"}, axis=1) \
+                               .rename_axis("dependent_var_modality", axis=0) \
+                               .loc[lambda df: df["independent_var_name"] != "intercept", :] \
+                    .reset_index(drop=False) \
+                    .rename({"lower": "coeff_LogR_lb", "upper": "coeff_LogR_ub"}, axis=1) \
+                    .melt(id_vars=["dependent_var_modality", "independent_var_name"],
+                          value_vars=["coeff_LogR_lb", "coeff_LogR_ub"],
+                          var_name="indicator") \
+                    .drop("independent_var_name", axis=1)
+                ########### LRT
+                self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
+                    "dependent_var_modality": "overall_margin",
+                    "indicator": "pvalue_LRT_LogR",
+                    "value": results.llr_pvalue
+                }, orient="index").transpose()
         else:
-            print(self.association_type)
-            print(self.dependent_var)
-            print(self.dependent_var.dtype)
-            print(self.independent_var)
-            print(self.independent_var.dtype)
-            print(" in continuous_continuous")
             llr_pvalue = results.compare_lr_test(OLS(results.model.endog, np.ones_like(results.model.endog)).fit())[1]
-            self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
-                "independent_var_modality": "overall_margin",
-                "indicator": "pvalue_LRT_LR",
-                "value": llr_pvalue
-            }, orient="index") \
-                .transpose()
-            self.list_df_results_statistics["params"] = results.params \
-                .to_frame() \
-                .drop("intercept") \
-                .rename({0: "value"}, axis=1) \
-                .assign(indicator="coeff_LR") \
-                .reset_index(drop=True)
-    
-            self.list_df_results_statistics["conf_int"] = results.conf_int() \
-                .drop("intercept", axis=0) \
-                .rename({0: "coeff_LR_lb",
-                         1: "coeff_LR_ub"}, axis=1) \
-                .melt(value_vars=["coeff_LR_lb", "coeff_LR_ub"],
-                      var_name="indicator")
-    
-            self.list_df_results_statistics["pvalues"] = results.pvalues \
-                .drop("intercept") \
-                .to_frame() \
-                .rename({0: "value"}, axis=1) \
-                .assign(indicator="pvalue_coeff_LR") \
-                .reset_index(drop=True)
+            if hasattr(self.independent_var, "cat"):
+                ########## MODEL
+                self.list_df_results_statistics["params"] = params \
+                    .rename_axis("independent_var_modality", axis=0) \
+                    .drop("intercept", axis=0) \
+                    .reset_index(drop=False) \
+                    .rename({0: "value"}, axis=1) \
+                    .assign(indicator="coeff_LR")
+                ########### LRT
+                self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
+                    "independent_var_modality": "overall_margin",
+                    "indicator": "pvalue_LRT_LR",
+                    "value": llr_pvalue
+                }, orient="index") \
+                    .transpose()
+                ########## pvalues model
+                self.list_df_results_statistics["pvalues"] = pvalues.rename_axis("independent_var_modality") \
+                    .rename("value") \
+                    .drop("intercept", axis=0) \
+                    .reset_index(drop=False) \
+                    .assign(indicator="pvalue_coeff_LR")
+                ####### conf int param model
+                self.list_df_results_statistics["conf_int"] = results.conf_int() \
+                                                                  .reset_index(drop=False) \
+                                                                  .rename({"index": "independent_var_modality",
+                                                                           0: "coeff_LR_lb",
+                                                                           1: "coeff_LR_ub"}, axis=1) \
+                                                                  .loc[lambda df: df["independent_var_modality"] != "intercept", :] \
+                    .melt(id_vars="independent_var_modality",
+                          value_vars=["coeff_LR_lb", "coeff_LR_ub"],
+                          var_name="indicator")
+            else:
+                self.list_df_results_statistics["LRT"] = pd.DataFrame.from_dict({
+                    "independent_var_modality": "overall_margin",
+                    "indicator": "pvalue_LRT_LR",
+                    "value": llr_pvalue
+                }, orient="index") \
+                    .transpose()
+                self.list_df_results_statistics["params"] = results.params \
+                    .to_frame() \
+                    .drop("intercept") \
+                    .rename({0: "value"}, axis=1) \
+                    .assign(indicator="coeff_LR") \
+                    .reset_index(drop=True)
+                self.list_df_results_statistics["conf_int"] = results.conf_int() \
+                    .drop("intercept", axis=0) \
+                    .rename({0: "coeff_LR_lb",
+                             1: "coeff_LR_ub"}, axis=1) \
+                    .melt(value_vars=["coeff_LR_lb", "coeff_LR_ub"],
+                          var_name="indicator")
+                self.list_df_results_statistics["pvalues"] = results.pvalues \
+                    .drop("intercept") \
+                    .to_frame() \
+                    .rename({0: "value"}, axis=1) \
+                    .assign(indicator="pvalue_coeff_LR") \
+                    .reset_index(drop=True)
         return
 
     def creating_empty_df_results(self):
@@ -418,50 +402,56 @@ class associationStatistics():
         return
 
     def gathering_statistics(self):
-        if self.association_type == "categorical_categorical":
-            statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                   axis=0,
-                                   ignore_index=True) \
-                .assign(ref_modality_dependent=self.ref_modality_dependent,
-                        ref_modality_independent=self.ref_modality_independent,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
+        if hasattr(self.dependent_var, "cat"):
+            if hasattr(self.independent_var, "cat"):
+                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
+                                       axis=0,
+                                       ignore_index=True) \
+                    .assign(ref_modality_dependent=self.ref_modality_dependent,
+                            ref_modality_independent=self.ref_modality_independent,
+                            independent_var_name=self.independent_var.name,
+                            dependent_var_name=self.dependent_var.name)
     
-        elif self.association_type == "categorical_continuous":
-            statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                   axis=0,
-                                   ignore_index=True) \
-                .assign(ref_modality_dependent=self.ref_modality_dependent,
-                        ref_modality_independent=np.NaN,
-                        independent_var_modality=np.NaN,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
-        elif self.association_type == "continuous_categorical":
-            statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                        axis=0,
-                                        ignore_index=True) \
-                .assign(ref_modality_dependent=np.NaN,
-                        dependent_var_modality=np.NaN,
-                        ref_modality_independent=self.ref_modality_independent,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
+            else:
+                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
+                                       axis=0,
+                                       ignore_index=True) \
+                    .assign(ref_modality_dependent=self.ref_modality_dependent,
+                            ref_modality_independent=np.NaN,
+                            independent_var_modality=np.NaN,
+                            independent_var_name=self.independent_var.name,
+                            dependent_var_name=self.dependent_var.name)
         else:
-            statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                                 axis=0,
-                                                 ignore_index=True) \
-                .assign(ref_modality_dependent=np.NaN,
-                        dependent_var_modality=np.NaN,
-                        ref_modality_independent=np.NaN,
-                        independent_var_modality=np.NaN,
-                        independent_var_name=self.independent_var.name,
-                        dependent_var_name=self.dependent_var.name)
+            if hasattr(self.independent_var, "cat"):
+                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
+                                            axis=0,
+                                            ignore_index=True) \
+                    .assign(ref_modality_dependent=np.NaN,
+                            dependent_var_modality=np.NaN,
+                            ref_modality_independent=self.ref_modality_independent,
+                            independent_var_name=self.independent_var.name,
+                            dependent_var_name=self.dependent_var.name)
+            else:
+                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
+                                                     axis=0,
+                                                     ignore_index=True) \
+                    .assign(ref_modality_dependent=np.NaN,
+                            dependent_var_modality=np.NaN,
+                            ref_modality_independent=np.NaN,
+                            independent_var_modality=np.NaN,
+                            independent_var_name=self.independent_var.name,
+                            dependent_var_name=self.dependent_var.name)
         return statistics
     
     def logs_creating(self, exception=None):
         error = False if exception is None else True
+        if error is True:
+            e = str(exception.__class__) + ": " + str(exception)
+        else:
+            e = None
         logs = {
             "error": error,
-            "logs": exception
+            "logs": e
         }
         return logs
 

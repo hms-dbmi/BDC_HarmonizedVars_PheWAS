@@ -43,7 +43,8 @@ def _quality_checking(study_df: pd.DataFrame,
     import warnings
     warnings.filterwarnings("ignore", 'This pattern has match groups')
     list_masks = []
-    list_patterns = [r"(\W|^)ID($|\W)", "identifier", "consent"]
+    # list_patterns = [r"(\W|^)ID($|\W)", "identifier", "consent"]
+    list_patterns = ["identifier", "consent"]
     for pattern in list_patterns:
         list_masks.append(study_df.columns.str.contains(pattern, regex=True, case=False).tolist())
     mask_varnames = pd.DataFrame(list_masks).any()

@@ -80,7 +80,8 @@ harmonized_variables_dictionary.join(variables_type_df, on="name") \
 
 parameters = {
     "univariate": True,
-    "Minimum number observations": 5,
+    "Minimum number observations": 10,
+    "threshold_crosscount": 10,
     "harmonized_variables_types": "all"
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:

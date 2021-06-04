@@ -11,7 +11,7 @@ from pandas.api.types import CategoricalDtype
 from python_lib.querying_hpds import get_HPDS_connection, query_runner
 from python_lib.quality_checking import quality_filtering
 from python_lib.descriptive_statistics import get_descriptive_statistics
-from python_lib.associative_statistics import associationStatistics, EndogOrExogUnique
+from python_lib.associative_statistics import associationStatistics, EndogOrExogUnique, CrossCountThreshold
 from scipy.linalg import LinAlgError
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
@@ -115,11 +115,14 @@ class RunPheWAS:
                     independent_var = self.filtered_df[independent_var_name].astype(CategoricalDtype(ordered=False))
                 else:
                     independent_var = self.filtered_df[independent_var_name]
-                association_statistics_instance = associationStatistics(dependent_var, independent_var)
+                association_statistics_instance = associationStatistics(dependent_var, independent_var, self.parameters_exp["threshold_crosscount"])
                 try:
+                    association_statistics_instance.data_management()
+                    association_statistics_instance.groupby_statistics()
+                    association_statistics_instance.test_statistics()
                     model = association_statistics_instance.create_model()
                     results = model.fit()
-                except (LinAlgError, PerfectSeparationError, EndogOrExogUnique) as exception:
+                except (LinAlgError, PerfectSeparationError, EndogOrExogUnique, CrossCountThreshold) as exception:
                     dic_logs_independent_var[independent_var_name] = association_statistics_instance.logs_creating(exception)
                     association_statistics_instance.creating_empty_df_results()
                 else:
@@ -143,17 +146,17 @@ class RunPheWAS:
         dir_logs = os.path.join("results/logs_association_statistics", self.phs)
         if not os.path.isdir(dir_logs):
             os.makedirs(dir_logs)
-        path_logs = os.path.join(dir_logs, str(self.batch_group) + ".pickle")
+        path_logs = os.path.join(dir_logs, str(self.batch_group) + ".json")
         with open(path_logs, "w+") as f:
             json.dump(dic_logs_dependent_var, f)
         
         return df_all_results, dic_logs_dependent_var
 
 
-
 if __name__ == '__main__':
     from env_variables.env_variables import TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID
     
+    start_time = datetime.now()
     parser = ArgumentParser()
     parser.add_argument("--phs", dest="phs", type=str, default=None)
     parser.add_argument("--batch_group", dest="batch_group", type=int, default=None)
@@ -172,6 +175,11 @@ if __name__ == '__main__':
                        phs=phs,
                        parameters_exp=parameters_exp
                        )
+    if os.environ['TEST'] == "True":
+        PheWAS.dependent_var_names = ['\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\']
+        print(PheWAS.dependent_var_names)
+    else:
+        print("not true")
     print("querying the data", datetime.now().time())
     PheWAS.querying_data()
     print("quality checking", datetime.now().time())
@@ -180,3 +188,10 @@ if __name__ == '__main__':
     PheWAS.descriptive_statistics()
     print("association statistics", datetime.now().time())
     df_all_results, dic_logs_dependent_var = PheWAS.association_statistics()
+    
+    end_time = datetime.now()
+    import csv
+    monitor_process_file = "monitor_process.tsv"
+    with open(monitor_process_file, "a") as tsvfile:
+        writer = csv.writer(tsvfile, delimiter="\t", lineterminator="\n")
+        writer.writerow([phs, str(batch_group), str(start_time), str(end_time)])

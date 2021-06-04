@@ -5,6 +5,20 @@ import re
 import pandas as pd
 import numpy as np
 
+path_logs = "results/logs_association_statistics/phs000007/0.pickle"
+with open(path_logs, "r") as f:
+    logs = json.load(f)
+
+path_association_results = "results/association_statistics/phs000007/0.csv"
+association_statistics = pd.read_csv(path_association_results)
+association_statistics.info()
+len(association_statistics.independent_var_name.unique())
+len(association_statistics.dependent_var_name.unique())
+test = pd.pivot(association_statistics,
+         columns="indicator",
+         values="value")
+test.columns
+test.coeff_LogR.isna().value_counts()
 # from datetime import datetime, timezone
 # dt = datetime(2020, 6, 1)
 # timestamp = dt.replace(tzinfo=timezone.utc).timestamp()
