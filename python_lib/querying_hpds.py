@@ -1,4 +1,6 @@
 from typing import Union, List
+import contextlib
+import io
 import re
 
 import pandas as pd
@@ -11,11 +13,47 @@ import PicSureClient
 from env_variables.env_variables import TOKEN, RESOURCE_ID, PICSURE_NETWORK_URL
 from python_lib.utils import get_multiIndex_variablesDict
 
+
+class HpdsHTTPError(Exception):
+    """
+    Raised to catch HTTP error messages from PICSURE
+    """
+
+
+class EmptyDataFrameError(Exception):
+    """
+    Raised to catch Data Frame returned empty
+    """
+
+    
+def raise_EmptyDataFrameError(function):
+    def error_handling_function(*args, **kwargs):
+        df_output = function(*args, **kwargs)
+        if df_output is None:
+            raise EmptyDataFrameError("No valid column names selected, output DF is empty")
+        else:
+            return df_output
+    return error_handling_function
+
+
+def raise_HpdsError(function):
+    def errors_handling_function(*args, **kwargs):
+        with contextlib.redirect_stdout(io.StringIO()) as f:
+            output = function(*args, **kwargs)
+        output_message = f.getvalue()
+        print(output_message)
+        if re.match("ERROR: HTTP response was bad", output_message) is not None:
+            raise HpdsHTTPError(output_message)
+        return output
+    return errors_handling_function
+
+
+@raise_HpdsError
 def get_HPDS_connection(my_token: str = TOKEN,
                         URL_data: str = PICSURE_NETWORK_URL,
                         resource_id: str = RESOURCE_ID):
     if my_token is None:
-        with open("token.txt", "r") as f:
+        with open("env_variables/token.txt", "r") as f:
             my_token = f.read()
     client = PicSureClient.Client()
     connection = client.connect(URL_data, my_token)
@@ -27,6 +65,8 @@ def get_HPDS_connection(my_token: str = TOKEN,
     return db_con
 
 
+@raise_EmptyDataFrameError
+@raise_HpdsError
 def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
                  to_select: Union[List[str], str] = None,
                  to_require: Union[List[str], str] = None,
@@ -91,9 +131,11 @@ def query_runner(resource: PicSureHpdsLib.Adapter.useResource,
     return _run_query(query, result_type, **kwargs)
 
 
+@raise_EmptyDataFrameError
+@raise_HpdsError
 def get_mock_df(resource=None):
     if resource is None:
-        with open("token.txt", "r") as f:
+        with open("env_variables/token.txt", "r") as f:
             token = f.read()
         resource = get_HPDS_connection(token)
     study_name = "Genetic Epidemiology of COPD (COPDGene) Funded by the National Heart, Lung, and Blood Institute ( phs000179 )"
@@ -124,7 +166,7 @@ def get_batch_groups(variablesDict: pd.DataFrame,
     else:
         return batch_indices
 
-
+@raise_HpdsError
 def get_whole_dic(resource=None,
                   batch_size: int = None,
                   write: bool = False):
@@ -150,7 +192,7 @@ def get_whole_dic(resource=None,
     else:
         return variablesDict
 
-
+@raise_HpdsError
 def get_studies_dictionary(resource=None) -> pd.DataFrame:
     """
     Return dataframe with names and phs number of the studies with at least one
@@ -181,7 +223,8 @@ def get_studies_dictionary(resource=None) -> pd.DataFrame:
                                       .rename_axis("study_name", axis=1)
     return studies_dictionary
 
-
+@raise_EmptyDataFrameError
+@raise_HpdsError
 def get_one_study(resource,
                   phs: str,
                   studies_info: pd.DataFrame,
@@ -210,32 +253,3 @@ def get_one_study(resource,
                          result_type=result_type,
                          **kwargs)
     return facts
-
-
-
-if __name__ == '__main__':
-    
-    client = PicSureClient.Client()
-    connection = client.connect(PICSURE_NETWORK_URL, TOKEN)
-    adapter = PicSureHpdsLib.Adapter(connection)
-    resource = adapter.useResource(RESOURCE_ID)
-    
-    # resource = get_HPDS_connection(URL_data, resource_id, my_token)
-    plain_variablesDict = resource.dictionary().find("COPDGene").DataFrame()
-    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
-    mask = variablesDict["simplified_name"] == "How old were you when you completely stopped smoking? [Years old]"
-    yo_stop_smoking_varname = variablesDict.loc[mask, "name"].values[0]
-    # %%
-    mask_cat = variablesDict["categorical"] == True
-    mask_count = variablesDict["observationCount"]
-    varnames = variablesDict.loc[mask_cat & mask_count, "name"]
-    
-    resource = get_HPDS_connection(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID)
-    df = query_runner(resource,
-                      to_select=varnames,
-                      to_require=varnames[2],
-                      to_filter={yo_stop_smoking_varname: {"min": 20, "max": 70}},
-                      result_type="DataFrame",
-                      timeout=30,
-                      low_memory=False
-                      )

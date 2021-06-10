@@ -3,3 +3,4 @@ env_variables/token.txt
 *ipynb_checkpoints*
 results/studies_stats/*
 *.pub
+results/archives/studies_stats/*
