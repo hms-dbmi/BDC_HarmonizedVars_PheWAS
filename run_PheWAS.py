@@ -292,17 +292,14 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    if True:
+    if False:
         PheWAS.dependent_var_names = [
             "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
-            # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
+            '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
             "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
             "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
         ]
-        # print(PheWAS.dependent_var_names)
         PheWAS.independent_var_names = PheWAS.independent_var_names[0:10]
-    else:
-        print("not a test")
     print("querying the data", datetime.now().time().strftime("%H:%M:%S"))
     PheWAS.querying_data()
     print("quality checking", datetime.now().time().strftime("%H:%M:%S"))
