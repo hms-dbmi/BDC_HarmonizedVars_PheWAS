@@ -110,6 +110,7 @@ class RunPheWAS:
     
     def querying_data(self):
         path_log = os.path.join(self.results_path, "logs_hpds_query", self.phs)
+        path_data = os.path.join("data", self.phs)
         if not os.path.isdir(path_log):
             os.makedirs(path_log)
         logs = {
@@ -118,16 +119,24 @@ class RunPheWAS:
             "time": datetime.now().strftime("%y/%m/%d %H:%M:%S")
         }
         try:
-            self.resource = get_HPDS_connection(self.token,
-                                                self.picsure_network_url,
-                                                self.resource_id)
-            self.study_df = query_runner(resource=self.resource,
-                                         to_select=self.dependent_var_names,
-                                         to_anyof=self.independent_var_names,
-                                         result_type="DataFrame",
-                                         low_memory=False,
-                                         timeout=500) \
-                [self.dependent_var_names + self.independent_var_names]
+            if self.parameters_exp["online"] is True:
+                self.resource = get_HPDS_connection(self.token,
+                                                    self.picsure_network_url,
+                                                    self.resource_id)
+                self.study_df = query_runner(resource=self.resource,
+                                             to_select=self.dependent_var_names,
+                                             to_anyof=self.independent_var_names,
+                                             result_type="DataFrame",
+                                             low_memory=False,
+                                             timeout=500) \
+                    [self.dependent_var_names + self.independent_var_names]
+            else:
+                self.study_df = pd.read_csv(os.path.join(path_data, str(self.batch_group) + ".csv"))
+            if self.parameters_exp["save"] is True:
+                if not os.path.isdir(path_data):
+                    os.makedirs(path_data)
+                self.study_df.to_csv(os.path.join(path_data, str(self.batch_group) + ".csv"), index=False)
+            
         except (EmptyDataFrameError, HpdsHTTPError) as exception:
             logs["error"] = True
             e = repr(exception)
@@ -195,8 +204,10 @@ class RunPheWAS:
     def association_statistics(self):
         dic_results_dependent_var = {}
         dic_logs_dependent_var = {}
+        counter_dependent_var = 0
         for dependent_var_name in self.filtered_dependent_var_names:
             print(dependent_var_name)
+            print("harmonized_var: {0} our of {1}".format(counter_dependent_var, len(self.filtered_dependent_var_names)))
             dependent_var = self.filtered_df[dependent_var_name]
             dic_results_independent_var = {}
             dic_logs_independent_var = {}
@@ -245,6 +256,7 @@ class RunPheWAS:
                 .reset_index(drop=False, level=0) \
                 .rename({"level_0": "independent_var_name"}, axis=1)
             dic_logs_dependent_var[dependent_var_name] = dic_logs_independent_var
+            counter_dependent_var += 1
         df_all_results = pd.concat(dic_results_dependent_var,
                                    axis=0,
                                    ignore_index=False) \

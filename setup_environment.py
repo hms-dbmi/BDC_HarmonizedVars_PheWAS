@@ -83,7 +83,9 @@ parameters = {
     "univariate": True,
     "Minimum number observations": 10,
     "threshold_crosscount": 10,
-    "harmonized_variables_types": "all"
+    "harmonized_variables_types": "all",
+    "online": True,
+    "save": False
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:
     yaml.dump(parameters, f)
