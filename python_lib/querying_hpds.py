@@ -253,32 +253,3 @@ def get_one_study(resource,
                          result_type=result_type,
                          **kwargs)
     return facts
-
-
-
-if __name__ == '__main__':
-    
-    client = PicSureClient.Client()
-    connection = client.connect(PICSURE_NETWORK_URL, TOKEN)
-    adapter = PicSureHpdsLib.Adapter(connection)
-    resource = adapter.useResource(RESOURCE_ID)
-    
-    # resource = get_HPDS_connection(URL_data, resource_id, my_token)
-    plain_variablesDict = resource.dictionary().find("COPDGene").DataFrame()
-    variablesDict = get_multiIndex_variablesDict(plain_variablesDict)
-    mask = variablesDict["simplified_name"] == "How old were you when you completely stopped smoking? [Years old]"
-    yo_stop_smoking_varname = variablesDict.loc[mask, "name"].values[0]
-    # %%
-    mask_cat = variablesDict["categorical"] == True
-    mask_count = variablesDict["observationCount"]
-    varnames = variablesDict.loc[mask_cat & mask_count, "name"]
-    
-    resource = get_HPDS_connection(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID)
-    df = query_runner(resource,
-                      to_select=varnames,
-                      to_require=varnames[2],
-                      to_filter={yo_stop_smoking_varname: {"min": 20, "max": 70}},
-                      result_type="DataFrame",
-                      timeout=30,
-                      low_memory=False
-                      )
