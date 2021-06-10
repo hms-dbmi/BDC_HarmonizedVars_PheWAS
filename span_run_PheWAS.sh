@@ -1,8 +1,8 @@
 #INPUT=batch_list.txt
 INPUT=env_variables/list_phs_batchgroup.csv
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
-CORES=1
-JOBS=`ps -df | grep run_PheWAS.py | wc -l`
+CORES=2
+JOBS=$(ps -df | grep run_PheWAS.py | wc -l)
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"
 date_start_process=$( date +"%y%m%d_%H%M%S" )
@@ -17,7 +17,7 @@ fi
   while IFS=, read -r phs batch_group
   do
      #phs=${f::9}
-        JOBS=`ps -df | grep run_PheWAS | wc -l`
+        JOBS=$(ps -df | grep run_PheWAS | wc -l)
         while [ "$[$CORES + 1]" -le "$JOBS" ]; do
 #                echo "cores loop $CORES"
 #                echo "jobs loop $JOBS"
