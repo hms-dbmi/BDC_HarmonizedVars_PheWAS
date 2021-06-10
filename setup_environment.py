@@ -30,15 +30,16 @@ subset_variables_dictionary.to_csv("env_variables/multiIndex_variablesDict.csv")
 subset_variables_dictionary.reset_index("level_0", drop=False)\
     .rename({"level_0": "study"}, axis=1)\
     .loc[:, ["study", "phs", "batch_group", "name"]]\
+    .assign(independent_var_id=np.arange(0, subset_variables_dictionary.shape[0]))\
     .to_csv("env_variables/list_eligible_variables.csv", index=False)
 
 subset_variables_dictionary[["phs", "batch_group"]].drop_duplicates()\
     .to_csv("env_variables/list_phs_batchgroup.csv", index=False)
 
+# Get Harmonized variables types
 renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmonized_variables_manual.csv")\
     .loc[lambda df: df["renaming_variables"].notnull(), :]\
     .set_index("harmonized_complete_name")
-
 harmonized_variables_dictionary = variables_dictionary.join(renaming_harmonized_variables_manual,
                           on="name",
                           how="inner")\
@@ -46,9 +47,7 @@ harmonized_variables_dictionary = variables_dictionary.join(renaming_harmonized_
     .reset_index(drop=True)
 
 list_harmonized_variables_names = harmonized_variables_dictionary["name"]
-
 harmonized_variables_df = query_runner(resource, to_select=list_harmonized_variables_names)
-
 variables_type = {}
 variables_modalities = {}
 for variable_name, serie in harmonized_variables_df[list_harmonized_variables_names].iteritems():
@@ -62,8 +61,6 @@ for variable_name, serie in harmonized_variables_df[list_harmonized_variables_na
     else:
         variables_type[variable_name] = "continuous"
         variables_modalities[variable_name] = np.NaN
-
-
 variables_type_df = pd.DataFrame.from_dict(variables_type,
                                            columns=["var_type"],
                                            orient="index")\
@@ -76,6 +73,7 @@ variables_modalities_df = pd.DataFrame.from_dict(variables_modalities,
 
 harmonized_variables_dictionary.join(variables_type_df, on="name") \
     .join(variables_modalities_df, on="name") \
+    .pipe(lambda df: df.assign(dependent_var_id=np.arange(0, df.shape[0])))\
     .to_csv("env_variables/list_harmonized_variables.csv", index=False)
 
 parameters = {

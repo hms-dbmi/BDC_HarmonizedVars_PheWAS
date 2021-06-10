@@ -5,11 +5,11 @@ import re
 import pandas as pd
 import numpy as np
 
-path_logs = "results/logs_association_statistics/phs000007/0.pickle"
+path_logs = "results/archives/logs_association_statistics/phs000007/0.pickle"
 with open(path_logs, "r") as f:
     logs = json.load(f)
 
-path_association_results = "results/association_statistics/phs000007/0.csv"
+path_association_results = "results/archives/association_statistics/phs000007/0.csv"
 association_statistics = pd.read_csv(path_association_results)
 association_statistics.info()
 len(association_statistics.independent_var_name.unique())

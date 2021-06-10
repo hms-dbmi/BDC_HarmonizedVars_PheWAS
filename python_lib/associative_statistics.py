@@ -9,10 +9,8 @@ from scipy.stats import chi2_contingency, f_oneway, pearsonr, spearmanr
 # TODO: handling the situations where value count inf to 5, discard variables automatically
 
 list_columns_names_export = [
-    "dependent_var_name",
     "dependent_var_modality",
     "ref_modality_dependent",
-    "independent_var_name",
     "independent_var_modality",
     "ref_modality_independent",
     "indicator",
@@ -24,46 +22,67 @@ class EndogOrExogUnique(Exception):
     """Raised when either the dependent or the independent variable are
              all NaN after removing NaN"""
 
-class CrossCountThreshold(Exception):
+
+class CrossCountThresholdError(Exception):
     """Raised when the marginal crosscount of non null values is below the
              specified value in parameters"""
+
+
+def nonNA_crosscount(df, dependent_var_name, independent_var_names):
+    dependent_not_null = df[dependent_var_name].notnull()
+    independent_not_null = df[independent_var_names].notnull()
+    non_na_sum = independent_not_null.apply(lambda serie: pd.concat([dependent_not_null, serie], axis=1) \
+                                            .all(axis=1)) \
+        .sum() \
+        .rename("value") \
+        .rename_axis("independent_var_name", axis=0) \
+        .to_frame() \
+        .assign(indicator="nonNA_crosscount",
+                dependent_var_modality="overall_margin",
+                independent_var_modality="overall_margin")
+    return non_na_sum
 
 
 class associationStatistics():
     
     def __init__(self,
                  dependent_var: pd.Series,
-                 independent_var: pd.Series,
-                 threshold_crosscount: int):
+                 independent_var: pd.Series):
         self.dependent_var = dependent_var
         self.independent_var = independent_var
-        if hasattr(self.dependent_var, 'cat'):
-            self.ref_modality_dependent = None
-        if hasattr(self.independent_var, 'cat'):
-            self.ref_modality_independent = None
-        self.threshold_crosscount = threshold_crosscount
+        self.ref_modality_dependent = None
+        self.ref_modality_independent = None
         self.list_df_results_statistics = {}
         self.logs = []
     
-    def data_management(self):
-
+    def drop_na(self):
+        mask_not_null = pd.concat([self.dependent_var, self.independent_var], axis=1).notnull().all(axis=1)
+        self.dependent_var = self.dependent_var[mask_not_null]
+        self.independent_var = self.independent_var[mask_not_null]
+        
+    
+    def normalize_continuous_var(self):
+        
+        def _normalize_var(var):
+            return 2*(var - min(var))/(max(var) - min(var)) - 1
+        if not hasattr(self.independent_var, "cat"):
+            self.independent_var = _normalize_var(self.independent_var)
+        
+        
+    def recode_levels(self):
+        
         def _get_ref_modality(variable):
             ref_modality = variable.value_counts() \
                 .loc[lambda serie: serie == serie.max()] \
                 .index[0]
             return ref_modality
-
+        
         def _change_ref_modality_variable(variable, ref_modality):
             new_levels = [ref_modality] + pd.CategoricalIndex(variable) \
                 .remove_categories(ref_modality) \
                 .categories.tolist()
             variable.cat = pd.CategoricalIndex(variable).reorder_categories(new_levels)
             return variable
-        mask_non_na = ~pd.concat([self.dependent_var, self.independent_var], axis=1).isna().any(axis=1)
-        self.dependent_var = self.dependent_var[mask_non_na]
-        self.independent_var = self.independent_var[mask_non_na]
-        if (len(self.dependent_var) <= self.threshold_crosscount) | (len(self.independent_var) <= self.threshold_crosscount):
-            raise CrossCountThreshold
         if hasattr(self.independent_var, 'cat'):
             self.independent_var = self.independent_var.cat.remove_unused_categories()
             self.ref_modality_independent = _get_ref_modality(self.independent_var)
@@ -73,6 +92,8 @@ class associationStatistics():
             self.ref_modality_dependent = _get_ref_modality(self.dependent_var)
             self.dependent_var = _change_ref_modality_variable(self.dependent_var, self.ref_modality_dependent)
         return
+        
+    
     
     def groupby_statistics(self):
         if hasattr(self.dependent_var, 'cat'):
@@ -85,7 +106,7 @@ class associationStatistics():
                     .reset_index(drop=False) \
                     .melt(id_vars="dependent_var_modality",
                           var_name="independent_var_modality") \
-                    .assign(indicator="nonNA_count")
+                    .assign(indicator="nonNA_crosscount")
             else:
                 groupby_stats = pd.DataFrame.from_dict({"dependent_var_name": self.dependent_var,
                                             "independent_var_name": self.independent_var},
@@ -93,7 +114,7 @@ class associationStatistics():
                     .groupby("dependent_var_name") \
                     .agg(["min", "max", "median", "mean", "count"]) \
                     .droplevel(level=0, axis=1) \
-                    .rename({"count": "nonNA_count"}, axis=1) \
+                    .rename({"count": "nonNA_crosscount"}, axis=1) \
                     .reset_index(drop=False) \
                     .melt(id_vars="dependent_var_name",
                           var_name="indicator") \
@@ -109,7 +130,7 @@ class associationStatistics():
                     .groupby("independent_var") \
                     .agg(["min", "max", "median", "mean", "count"]) \
                     .droplevel(level=0, axis=1) \
-                    .rename({"count": "nonNA_count"}, axis=1) \
+                    .rename({"count": "nonNA_crosscount"}, axis=1) \
                     .reset_index(drop=False) \
                     .melt(id_vars="independent_var",
                           var_name="indicator") \
@@ -118,9 +139,10 @@ class associationStatistics():
             else:
                 groupby_stats = self.dependent_var\
                     .agg(["min", "max", "std", "mean", "median", "count"])\
-                    .rename("value")\
+                    .rename("value") \
                     .rename_axis("indicator", axis=0)\
-                    .reset_index()
+                    .reset_index()\
+                    .replace({"indicator": {"count": "nonNA_crosscount"}})
         self.list_df_results_statistics["groupby_stats"] = groupby_stats
     
     
@@ -188,7 +210,7 @@ class associationStatistics():
         return
     
     def create_model(self):
-        if (len(self.dependent_var.unique()) <= self.threshold_crosscount) | (len(self.independent_var.unique()) <= self.threshold_crosscount):
+        if (len(self.dependent_var.dropna().unique()) <= 1) | (len(self.independent_var.dropna().unique()) <= 1):
             raise EndogOrExogUnique
         if hasattr(self.independent_var, 'cat'):
             X = pd.get_dummies(self.independent_var.astype(str), drop_first=False) \
@@ -197,10 +219,10 @@ class associationStatistics():
         else:
             X = self.independent_var.to_frame().assign(intercept=1)
         if hasattr(self.dependent_var, 'cat'):
-            y = self.dependent_var.cat.codes.values
+            y = self.dependent_var.cat.codes
             return MNLogit(y, X)
         else:
-            y = self.dependent_var
+            y = self.dependent_var.values
             return OLS(y, X)
         
         
@@ -336,7 +358,6 @@ class associationStatistics():
         return
 
     def creating_empty_df_results(self):
-        
         if hasattr(self.dependent_var, 'cat'):
             if hasattr(self.independent_var, 'cat'):
                 list_indicators = [
@@ -402,56 +423,19 @@ class associationStatistics():
         return
 
     def gathering_statistics(self):
+        statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
+                               axis=0,
+                               ignore_index=True) \
+            .assign(ref_modality_dependent=self.ref_modality_dependent,
+                    ref_modality_independent=self.ref_modality_independent) # Assigning None for continuous variables
         if hasattr(self.dependent_var, "cat"):
-            if hasattr(self.independent_var, "cat"):
-                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                       axis=0,
-                                       ignore_index=True) \
-                    .assign(ref_modality_dependent=self.ref_modality_dependent,
-                            ref_modality_independent=self.ref_modality_independent,
-                            independent_var_name=self.independent_var.name,
-                            dependent_var_name=self.dependent_var.name)
-    
-            else:
-                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                       axis=0,
-                                       ignore_index=True) \
-                    .assign(ref_modality_dependent=self.ref_modality_dependent,
-                            ref_modality_independent=np.NaN,
-                            independent_var_modality=np.NaN,
-                            independent_var_name=self.independent_var.name,
-                            dependent_var_name=self.dependent_var.name)
+            if not hasattr(self.independent_var, "cat"):
+                statistics = statistics.assign(independent_var_modality=np.NaN)
         else:
             if hasattr(self.independent_var, "cat"):
-                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                            axis=0,
-                                            ignore_index=True) \
-                    .assign(ref_modality_dependent=np.NaN,
-                            dependent_var_modality=np.NaN,
-                            ref_modality_independent=self.ref_modality_independent,
-                            independent_var_name=self.independent_var.name,
-                            dependent_var_name=self.dependent_var.name)
+                statistics = statistics.assign(dependent_var_modality=np.NaN)
             else:
-                statistics = pd.concat([v for v in self.list_df_results_statistics.values()],
-                                                     axis=0,
-                                                     ignore_index=True) \
-                    .assign(ref_modality_dependent=np.NaN,
-                            dependent_var_modality=np.NaN,
-                            ref_modality_independent=np.NaN,
-                            independent_var_modality=np.NaN,
-                            independent_var_name=self.independent_var.name,
-                            dependent_var_name=self.dependent_var.name)
-        return statistics
+                statistics = statistics.assign(dependent_var_modality=np.NaN,
+                                               independent_var_modality=np.NaN)
+        return statistics[list_columns_names_export]
     
-    def logs_creating(self, exception=None):
-        error = False if exception is None else True
-        if error is True:
-            e = str(exception.__class__) + ": " + str(exception)
-        else:
-            e = None
-        logs = {
-            "error": error,
-            "logs": e
-        }
-        return logs
-
