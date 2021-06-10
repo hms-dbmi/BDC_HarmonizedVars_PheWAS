@@ -26,10 +26,12 @@ subset_variables_dictionary = subset_variables_dictionary.groupby("level_0") \
     .apply(lambda df: get_batch_groups(df, batch_size, assign=True))
 
 
-subset_variables_dictionary.to_csv("env_variables/multiIndex_variablesDict.csv")
+subset_variables_dictionary\
+    .to_csv("env_variables/multiIndex_variablesDict.csv")
 subset_variables_dictionary.reset_index("level_0", drop=False)\
-    .rename({"level_0": "study"}, axis=1)\
-    .loc[:, ["study", "phs", "batch_group", "name"]]\
+    .rename({"level_0": "study",
+             "name": "var_name"}, axis=1)\
+    .loc[:, ["study", "phs", "batch_group", "var_name"]]\
     .assign(independent_var_id=np.arange(0, subset_variables_dictionary.shape[0]))\
     .to_csv("env_variables/list_eligible_variables.csv", index=False)
 
@@ -43,10 +45,11 @@ renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmo
 harmonized_variables_dictionary = variables_dictionary.join(renaming_harmonized_variables_manual,
                           on="name",
                           how="inner")\
-    .loc[:, ["name", "renaming_variables", "renaming_variables_nice"]]\
+    .rename({"name": "var_name"}, axis=1)\
+    .loc[:, ["var_name", "renaming_variables", "renaming_variables_nice"]]\
     .reset_index(drop=True)
 
-list_harmonized_variables_names = harmonized_variables_dictionary["name"]
+list_harmonized_variables_names = harmonized_variables_dictionary["var_name"]
 harmonized_variables_df = query_runner(resource, to_select=list_harmonized_variables_names)
 variables_type = {}
 variables_modalities = {}
@@ -64,15 +67,15 @@ for variable_name, serie in harmonized_variables_df[list_harmonized_variables_na
 variables_type_df = pd.DataFrame.from_dict(variables_type,
                                            columns=["var_type"],
                                            orient="index")\
-            .rename_axis("name", axis="index")
+            .rename_axis("var_name", axis="index")
 variables_modalities_df = pd.DataFrame.from_dict(variables_modalities,
                                                  columns=["modalities"],
                                                  orient="index",
                                                  dtype=str)\
-    .rename_axis("name", axis="index")
+    .rename_axis("var_name", axis="index")
 
-harmonized_variables_dictionary.join(variables_type_df, on="name") \
-    .join(variables_modalities_df, on="name") \
+harmonized_variables_dictionary.join(variables_type_df, on="var_name") \
+    .join(variables_modalities_df, on="var_name") \
     .pipe(lambda df: df.assign(dependent_var_id=np.arange(0, df.shape[0])))\
     .to_csv("env_variables/list_harmonized_variables.csv", index=False)
 

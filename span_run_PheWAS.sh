@@ -1,7 +1,7 @@
 #INPUT=batch_list.txt
 INPUT=env_variables/list_phs_batchgroup.csv
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
-CORES=2
+CORES=1
 JOBS=`ps -df | grep run_PheWAS.py | wc -l`
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"

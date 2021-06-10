@@ -34,9 +34,9 @@ class MappingError(Exception):
 
 def var_name_to_id(df_to_map: pd.DataFrame) -> pd.DataFrame:
     df_dependent_vars_id = pd.read_csv("env_variables/list_harmonized_variables.csv") \
-        .set_index("name", drop=True)["dependent_var_id"].to_frame()
+        .set_index("var_name", drop=True)["dependent_var_id"].to_frame()
     df_independent_vars_id = pd.read_csv("env_variables/list_eligible_variables.csv") \
-        .set_index("name", drop=True)["independent_var_id"].to_frame()
+        .set_index("var_name", drop=True)["independent_var_id"].to_frame()
     df_mapped = df_to_map.join(df_independent_vars_id, how="left", on="independent_var_name") \
         .join(df_dependent_vars_id, how="left", on="dependent_var_name") \
         .drop(["dependent_var_name", "independent_var_name"], axis=1)
@@ -47,9 +47,9 @@ def var_name_to_id(df_to_map: pd.DataFrame) -> pd.DataFrame:
 
 def var_id_to_name(df_to_map: pd.DataFrame):
     df_dependent_vars_id = pd.read_csv("env_variables/list_harmonized_variables.csv") \
-        .set_index("name", drop=True)["dependent_var_id"].to_frame()
+        .set_index("var_name", drop=True)["dependent_var_id"].to_frame()
     df_independent_vars_id = pd.read_csv("env_variables/list_eligible_variables.csv") \
-        .set_index("name", drop=True)["independent_var_id"].to_frame()
+        .set_index("var_name", drop=True)["independent_var_id"].to_frame()
     df_mapped = df_to_map.join(df_independent_vars_id, how="left", on="independent_var_id") \
         .join(df_dependent_vars_id, how="left", on="dependent_var_id") \
         .drop(["dependent_var_id", "independent_var_id"], axis=1)
@@ -79,13 +79,13 @@ class RunPheWAS:
         list_harmonized_variables = pd.read_csv("env_variables/list_harmonized_variables.csv")
         if self.parameters_exp["harmonized_variables_types"] == "categorical":
             self.dependent_var_names = list_harmonized_variables.loc[
-                lambda df: df["categorical"] == True, "name"].tolist()
+                lambda df: df["categorical"] == True, "var_name"].tolist()
         elif self.parameters_exp["harmonized_variables_types"] == "all":
-            self.dependent_var_names = list_harmonized_variables.loc[:, "name"].tolist()
+            self.dependent_var_names = list_harmonized_variables.loc[:, "var_name"].tolist()
         else:
             raise ValueError("harmonized_variables_types should be either 'categorical' or 'all'")
         self.independent_var_names = eligible_variables \
-            .loc[lambda df: (df["phs"] == phs) & (df["batch_group"] == batch_group), "name"] \
+            .loc[lambda df: (df["phs"] == phs) & (df["batch_group"] == batch_group), "var_name"] \
             .tolist()
         self.var_types = None
         self.study_df = None
@@ -175,7 +175,6 @@ class RunPheWAS:
         dependent_var_types = pd.read_csv("env_variables/list_harmonized_variables.csv",
                                           index_col=0) \
             .loc[self.filtered_dependent_var_names, "var_type"] \
-            .drop_duplicates() \
             .to_dict()
         self.var_types = {**dependent_var_types,
                           **independent_var_types
