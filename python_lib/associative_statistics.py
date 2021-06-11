@@ -147,6 +147,8 @@ class associationStatistics():
     
     
     def test_statistics(self):
+        if (len(self.dependent_var.dropna().unique()) <= 1) | (len(self.independent_var.dropna().unique()) <= 1):
+            raise EndogOrExogUnique
         if hasattr(self.dependent_var, "cat"):
             if hasattr(self.dependent_var, "cat"):
                 chi2_pvalue = chi2_contingency(pd.crosstab(index=self.dependent_var,
@@ -438,6 +440,10 @@ class associationStatistics():
                 statistics = statistics.assign(dependent_var_modality=np.NaN,
                                                independent_var_modality=np.NaN)
         return statistics[list_columns_names_export]
+    
 if __name__ == '__main__':
-    independent_var = 25
+    var_test = "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
+    ind_test = "\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Brief up-date on general health status and changes that may have occurred since last visit. Data were collected at year 17 (6-months phone interview follow-up).\\DAYS IN BED FOR ILLNESS OR INJURY\\"
+    
+    instance = associationStatistics(var_test, ind_test)
     

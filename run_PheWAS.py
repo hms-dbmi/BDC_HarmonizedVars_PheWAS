@@ -233,10 +233,10 @@ class RunPheWAS:
                 independent_var = self.filtered_df[independent_var_name]
                 association_statistics_instance = associationStatistics(dependent_var,
                                                                         independent_var)
+                association_statistics_instance.drop_na()
+                association_statistics_instance.normalize_continuous_var()
+                association_statistics_instance.groupby_statistics()
                 try:
-                    association_statistics_instance.drop_na()
-                    association_statistics_instance.normalize_continuous_var()
-                    association_statistics_instance.groupby_statistics()
                     association_statistics_instance.recode_levels()
                     association_statistics_instance.test_statistics()
                     model = association_statistics_instance.create_model()
@@ -305,7 +305,7 @@ if __name__ == '__main__':
                        time_launched=time_launched
                        )
     if os.environ["TEST"] == "True":
-        pass
+        # pass
         # PheWAS.dependent_var_names = [
         #     # "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
         #     # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
@@ -315,6 +315,9 @@ if __name__ == '__main__':
         #     "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
         #     ]
         # PheWAS.independent_var_names = PheWAS.indepe`ndent_var_names[1:3]
+        PheWAS.dependent_var_names = ["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\\"]
+        PheWAS.independent_var_names = ["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Data contain extensive medical history information of subjects (all > 65 years of age)\\K-channel blockers to enhance insulin se\\"]
+        # batch_group=4 phs=phs000287
     print(phs, batch_group)
     print("querying the data", datetime.now().time().strftime("%H:%M:%S"))
     PheWAS.querying_data()
