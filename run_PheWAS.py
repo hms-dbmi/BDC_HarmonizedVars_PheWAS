@@ -204,7 +204,7 @@ class RunPheWAS:
     def association_statistics(self):
         dic_results_dependent_var = {}
         dic_logs_dependent_var = {}
-        counter_dependent_var = 0
+        counter_dependent_var = 1
         for dependent_var_name in self.filtered_dependent_var_names:
             print(dependent_var_name)
             print("harmonized_var: {0} our of {1}".format(counter_dependent_var, len(self.filtered_dependent_var_names)))
@@ -228,6 +228,7 @@ class RunPheWAS:
             n = 0
             for independent_var_name in subset_independent_var_names:
                 n += 1
+                print(independent_var_name)
                 print("{n} out of {total_var}".format(n=n, total_var=len(subset_independent_var_names)))
                 independent_var = self.filtered_df[independent_var_name]
                 association_statistics_instance = associationStatistics(dependent_var,
@@ -303,14 +304,18 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    if False:
-        PheWAS.dependent_var_names = [
-            "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
-            '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
-            "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
-            "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
-        ]
-        PheWAS.independent_var_names = PheWAS.independent_var_names[0:10]
+    if os.environ["TEST"] == "True":
+        pass
+        # PheWAS.dependent_var_names = [
+        #     # "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
+        #     # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
+        #     # "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
+        #     # "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
+        #     # "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
+        #     "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
+        #     ]
+        # PheWAS.independent_var_names = PheWAS.indepe`ndent_var_names[1:3]
+    print(phs, batch_group)
     print("querying the data", datetime.now().time().strftime("%H:%M:%S"))
     PheWAS.querying_data()
     print("quality checking", datetime.now().time().strftime("%H:%M:%S"))
@@ -329,3 +334,4 @@ if __name__ == '__main__':
         end_time = datetime.now().strftime("%y/%m/%d_%H:%M:%S")
         writer = csv.writer(tsvfile, delimiter="\t", lineterminator="\n")
         writer.writerow([phs, str(batch_group), str(start_time), str(end_time)])
+

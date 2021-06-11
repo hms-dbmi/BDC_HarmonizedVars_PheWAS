@@ -44,8 +44,30 @@ def raise_HpdsError(function):
         print(output_message)
         if re.match("ERROR: HTTP response was bad", output_message) is not None:
             raise HpdsHTTPError(output_message)
-        return output
+        else:
+            return output
     return errors_handling_function
+
+def retry_query(function):
+    def retry_query_function(*args, **kwargs):
+        n = 0
+        def _snippet(*args, **kwargs):
+            with contextlib.redirect_stdout(io.StringIO()) as f:
+                output = function(*args, **kwargs)
+            output_message = f.getvalue()
+            return output, output_message
+        output, output_message = _snippet(*args, **kwargs)
+        while re.match("ERROR: HTTP response was bad", output_message) is not None:
+            n += 1
+            import time
+            time.sleep(120)
+            if n <= 3:
+                output, output_message = _snippet(*args, **kwargs)
+            else:
+                return output_message
+        else:
+            return output
+    return retry_query_function
 
 
 @raise_HpdsError

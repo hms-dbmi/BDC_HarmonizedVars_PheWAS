@@ -438,4 +438,6 @@ class associationStatistics():
                 statistics = statistics.assign(dependent_var_modality=np.NaN,
                                                independent_var_modality=np.NaN)
         return statistics[list_columns_names_export]
+if __name__ == '__main__':
+    independent_var = 25
     
