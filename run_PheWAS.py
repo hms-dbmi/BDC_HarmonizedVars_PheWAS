@@ -241,6 +241,7 @@ class RunPheWAS:
                     association_statistics_instance.test_statistics()
                     model = association_statistics_instance.create_model()
                     results = model.fit()
+                # todo: eventually remove this KeyError Exception
                 except (LinAlgError, PerfectSeparationError, EndogOrExogUnique, KeyError) as exception:
                     dic_logs_independent_var[independent_var_name] = self.logs_creating(exception)
                     association_statistics_instance.creating_empty_df_results()
@@ -304,20 +305,6 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    # if os.environ["TEST"] == "True":
-    #     # pass
-    #     # PheWAS.dependent_var_names = [
-    #     #     # "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
-    #     #     # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
-    #     #     # "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
-    #     #     # "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
-    #     #     # "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
-    #     #     "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
-    #     #     ]
-    #     # PheWAS.independent_var_names = PheWAS.indepe`ndent_var_names[1:3]
-    #     PheWAS.dependent_var_names = ["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\\"]
-    #     PheWAS.independent_var_names = ["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Data contain extensive medical history information of subjects (all > 65 years of age)\\K-channel blockers to enhance insulin se\\"]
-        # batch_group=4 phs=phs000287
     print(phs, batch_group)
     print("querying the data", datetime.now().time().strftime("%H:%M:%S"))
     PheWAS.querying_data()
