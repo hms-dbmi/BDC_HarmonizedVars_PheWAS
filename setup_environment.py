@@ -85,7 +85,7 @@ parameters = {
     "threshold_crosscount": 10,
     "harmonized_variables_types": "all",
     "online": True,
-    "save": False
+    "save": True
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:
     yaml.dump(parameters, f)
