@@ -74,7 +74,7 @@ class RunPheWAS:
         self.phs = phs
         self.batch_group = batch_group
         self.parameters_exp = parameters_exp
-        self.results_path = os.path.join("results", time_launched)
+        self.results_path = os.path.join(parameters_exp["path_results"], time_launched)
         eligible_variables = pd.read_csv("env_variables/list_eligible_variables.csv")
         list_harmonized_variables = pd.read_csv("env_variables/list_harmonized_variables.csv")
         if self.parameters_exp["harmonized_variables_types"] == "categorical":
