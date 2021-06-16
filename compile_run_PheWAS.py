@@ -5,10 +5,138 @@ import re
 import pandas as pd
 import numpy as np
 
-path_logs = "results/archives/logs_association_statistics/phs000007/0.pickle"
-with open(path_logs, "r") as f:
-    logs = json.load(f)
+path_exp = "./results_server/results/210612_004737/"
+path_logs_stats = os.path.join(path_exp, "logs_association_statistics")
+path_logs_hpds = os.path.join(path_exp, "logs_association_statistics")
+path_association_statistics_results = os.path.join(path_exp, "association_statistics")
 
+
+
+## Get the number of phenotypic variables
+study_info = pd.read_csv("env_variables/studies_info_manual_dont_erase.csv", index_col=0)
+df_eligible_variables = pd.read_csv("env_variables/list_eligible_variables.csv")\
+    .join(study_info["BDC_study_name"], on="phs")
+df_eligible_variables.BDC_study_name.unique().shape[0]
+df_eligible_variables_value_counts = df_eligible_variables["BDC_study_name"]\
+    .value_counts()
+sum_df_eligible_variables_counts = df_eligible_variables_value_counts.sum()
+df_eligible_variables_value_counts\
+    .append(pd.Series([sum_df_eligible_variables_counts], index=["Total"]), ignore_index=False)\
+    .rename_axis("Name Study")\
+    .rename("Phenotypic Variables Count")\
+    .to_frame()\
+    .to_csv("exports_presentation/tables/ind_variable_counts_per_studies.csv")
+
+
+
+def read_json_associations(path_dir):
+    import glob, os
+    from pathlib import Path
+
+    list_logs = []
+    for phs in os.listdir(path_dir):
+        print(phs)
+        path_subdir = os.path.join(path_dir, phs)
+        print(path_subdir)
+        for batch_group in os.listdir(path_subdir):
+            print(batch_group)
+            path_file = os.path.join(path_subdir,  batch_group)
+            print(path_file)
+            with open(path_file, "r") as json_file:
+                logs = json.load(json_file)
+                logs = {}
+            list_logs.append(logs)
+    df_logs = pd.concat([pd.DataFrame.from_dict(df) for df in list_logs])
+    return df_logs
+    
+
+def read_association_results(path_dir):
+    
+    list_results = []
+    for phs in os.listdir(path_dir):
+        print(phs)
+        path_subdir = os.path.join(path_dir, phs)
+        print(path_subdir)
+        for batch_group in os.listdir(path_subdir):
+            print(batch_group)
+            path_file = os.path.join(path_subdir,  batch_group)
+            print(path_file)
+            results = pd.read_csv(path_file)
+            pvalues = results.loc[lambda df: df["indicator"].str.contains("LRT") == True, ["value", "independent_var_id", "dependent_var_id"]]
+            list_results.append(pvalues)
+    
+    df_results_pvalues = pd.concat([pd.DataFrame.from_dict(df) for df in list_results])
+    
+    return df_results_pvalues
+
+
+    
+pvalues2 = read_association_results(path_dir)
+
+# Number of eligible variables after quality checking eligible variables
+quality_checking = pd.read_csv("quality_checking")
+# Information to gather
+## Number of batch runs
+monitor_process = pd.read_table(os.path.join(path_exp, "monitor_process.tsv"),
+                                sep="\t",
+                                header=None)\
+    .rename({0: "phs", 1:"batch_group"}, axis=1)\
+    .set_index(["phs", "batch_group"])
+
+df_eligible_variables.set_index(["phs", "batch_group"])\
+    .join(monitor_process, how="inner")
+
+## Number of studies
+
+
+
+## Number of pvalues
+## Number of associations ran
+df_results_pvalues = read_association_results(os.path.join(path_exp, "association_statistics"))
+df_results_pvalues.shape[0]
+# Bonferonni threshold for significance
+bonferonni = 0.05/df_results_pvalues.shape[0]
+
+## Number of failure
+df_results_pvalues.value.isna().value_counts()
+## Number of results below threshold
+df_results_pvalues.loc[lambda df: df["value"]< bonferonni, :]
+df_results_pvalues.loc[lambda df: df["value"]< 0.05, :]
+## Number of counts
+
+
+## Parameters to tweak
+
+## Size of results
+
+
+## Expected size of results
+
+## Some
+
+## Technical challenges
+--> adapt the instance
+## Methodological challenges
+--> how to produce meaningful results?
+    --> Cross with PubMed results
+    --> Produce result explorator
+- What I suspect is that there is some categorical variables that create a lot of subcategories, creating a lot of supplemental models to be ran
+
+results.info()
+df_results = pd.read_csv(path_dir + "")
+    
+    
+    for sub_dir in sub_directories:
+        os.chdir(sub_dir)
+        for batch_group in glob.glob("*.json"):
+            all_json_files.append(sub_dir + "/" + batch_group)
+
+    # Get back to original working directory
+    os.chdir(working_directory)
+    
+    list_of_dfs = [pd.read_json(x) for x in all_json_files]
+    
+    return jsons
 path_association_results = "results/archives/association_statistics/phs000007/0.csv"
 association_statistics = pd.read_csv(path_association_results)
 association_statistics.info()
