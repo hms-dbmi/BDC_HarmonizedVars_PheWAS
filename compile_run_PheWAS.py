@@ -5,12 +5,94 @@ import re
 import pandas as pd
 import numpy as np
 
+from python_lib.errors import ExtensionError
 path_exp = "./results_server/results/210612_004737/"
-path_logs_stats = os.path.join(path_exp, "logs_association_statistics")
-path_logs_hpds = os.path.join(path_exp, "logs_association_statistics")
-path_association_statistics_results = os.path.join(path_exp, "association_statistics")
 
 
+
+
+class CompilePheWAS_Results():
+    
+    def __init__(self,
+                 path_exp):
+        
+        self.path_logs_stats = os.path.join(path_exp, "logs_association_statistics")
+        self.path_logs_hpds = os.path.join(path_exp, "logs_association_statistics")
+        self.path_association_statistics_results = os.path.join(path_exp, "association_statistics")
+
+    @staticmethod
+    def download_dropbox(function):
+        def _download_dropbox(*args, **kwargs):
+            if args[0].dropbox is True:
+                # TODO: to be implemented eventually
+                pass
+            return function(**args, **kwargs)
+    
+        return _download_dropbox
+
+    @staticmethod
+    @download_dropbox
+    def read_file(file_name, dir_path, *args, **kwargs):
+        file_path = os.path.join(dir_path, file_name)
+        extension_regex = re.compile(r"\.[a-z]+$")
+        extension = re.search(extension_regex, file_path).group()
+        if extension == ".csv":
+            output = pd.read_csv(file_path, *args, **kwargs)
+        elif extension == ".json":
+            with open(file_path, "w+") as json_file:
+                output = json.load(json_file, *args, **kwargs)
+        elif extension == ".txt":
+            with open(file_path, "w+") as text_file:
+                output = text_file.read()
+        else:
+            raise ExtensionError
+        return output
+
+    def get_logs_hpds():
+        pass
+        return
+    
+    def get_logs_quality_checking():
+        pass
+        return
+    
+    def get_logs_statistics():
+        pass
+        return
+    
+    def get_descriptive_statistics():
+        pass
+        return
+    
+    def compile_association_statistics():
+        pass
+        return
+        
+
+if __name__ == '__main__':
+    path_exp = "./results_server/results/210612_004737/"
+    path_logs_stats = os.path.join(path_exp, "logs_association_statistics")
+    path_logs_hpds = os.path.join(path_exp, "logs_association_statistics")
+    path_association_statistics_results = os.path.join(path_exp, "association_statistics")
+    path_test_df = os.path.join(path_association_statistics_results, "phs000007/0.csv")
+    path_test_df = os.path.join(path_association_statistics_results, "phs000007/23.csv")
+    test_df = pd.read_csv(path_test_df)
+    test_df.to_pickle(os.path.join(path_association_statistics_results, "phs000007/0.zip"),
+                      compression="infer")
+        
+    test_df.to_pickle(os.path.join(path_association_statistics_results, "phs000007/0.gzip"),
+                      compression="infer")
+    
+    test_df.to_pickle(os.path.join(path_association_statistics_results, "phs000007/23.zip"),
+                      compression="infer")
+    test_df.to_pickle(os.path.join(path_association_statistics_results, "phs000007/23.pickle"),
+                      compression="infer")
+    test2 = pd.read_pickle(os.path.join(path_association_statistics_results, "phs000007/23.zip"))
+    test2 = pd.read_pickle(os.path.join(path_association_statistics_results, "phs000007/0.zip"))
+    path_test_df = os.path.join(path_association_statistics_results, "phs000007/0.csv")
+        
+        
+    
 
 ## Get the number of phenotypic variables
 study_info = pd.read_csv("env_variables/studies_info_manual_dont_erase.csv", index_col=0)

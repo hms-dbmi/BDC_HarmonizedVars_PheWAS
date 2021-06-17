@@ -10,6 +10,7 @@ import yaml
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 
+from python_lib.errors import ExtensionError, MappingError
 from python_lib.querying_hpds import get_HPDS_connection, query_runner, HpdsHTTPError, EmptyDataFrameError
 from python_lib.quality_checking import quality_filtering
 from python_lib.descriptive_statistics import get_descriptive_statistics
@@ -20,22 +21,6 @@ from python_lib.associative_statistics import associationStatistics, \
 from scipy.linalg import LinAlgError
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
-
-class ExtensionError(Exception):
-    """
-        Raised when the regex did not detect one of the file extensions to be written
-    """
-
-class NoVariablesError(Exception):
-    """
-        Raised when all variables are being filtered by quality checking
-    """
-
-
-class MappingError(Exception):
-    """
-        Raised when variables mapping are
-    """
 
 def upload_dropbox(function):
     def inner_function(*args, **kwargs):
