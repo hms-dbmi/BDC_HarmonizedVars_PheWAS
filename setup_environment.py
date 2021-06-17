@@ -86,7 +86,8 @@ parameters = {
     "harmonized_variables_types": "all",
     "online": True,
     "save": True,
-    "results_path": "./results"
+    "results_path": "./results",
+    "storage_dropbox": False
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:
     yaml.dump(parameters, f)
