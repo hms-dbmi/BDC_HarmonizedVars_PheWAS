@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser
 from datetime import datetime
 import csv
+import re
 
 import json
 import yaml
@@ -20,6 +21,11 @@ from scipy.linalg import LinAlgError
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 
+class ExtensionError(Exception):
+    """
+        Raised when the regex did not detect one of the file extensions to be written
+    """
+
 class NoVariablesError(Exception):
     """
         Raised when all variables are being filtered by quality checking
@@ -30,6 +36,14 @@ class MappingError(Exception):
     """
         Raised when variables mapping are
     """
+
+def upload_dropbox(function):
+    def inner_function(*args, **kwargs):
+        if args[0].parameters_exp["dropbox"] is True:
+            #TODO: to be implemented eventually
+            pass
+        return function(*args, **kwargs)
+    return inner_function
 
 
 def var_name_to_id(df_to_map: pd.DataFrame) -> pd.DataFrame:
@@ -96,6 +110,23 @@ class RunPheWAS:
         self.crosscount_filtered_independent_var_names = None
     
     @staticmethod
+    @upload_dropbox
+    def write_file(py_object, file_name, dir_path, *args, **kwargs):
+        file_path = os.path.join(dir_path, file_name)
+        extension_regex = re.compile(r"\.[a-z]+$")
+        extension = re.search(extension_regex, file_path).group()
+        if extension == ".csv":
+            py_object.to_csv(file_path, *args, **kwargs)
+        elif extension == ".json":
+            with open(file_path, "w+") as json_file:
+                json.dump(py_object, json_file, *args, **kwargs)
+        elif extension == ".txt":
+            with open(file_path, "w+") as text_file:
+                text_file.write(py_object)
+        else:
+            raise ExtensionError
+        
+    @staticmethod
     def logs_creating(exception=None):
         error = False if exception is None else True
         if error is True:
@@ -135,7 +166,10 @@ class RunPheWAS:
             if self.parameters_exp["save"] is True:
                 if not os.path.isdir(path_data):
                     os.makedirs(path_data)
-                self.study_df.to_csv(os.path.join(path_data, str(self.batch_group) + ".csv"), index=False)
+                self.write_file(py_object=self.study_df,
+                                dir_path=path_data,
+                                file_name=str(self.batch_group) + ".csv",
+                                index=False)
             
         except (EmptyDataFrameError, HpdsHTTPError) as exception:
             logs["error"] = True
@@ -146,8 +180,9 @@ class RunPheWAS:
             e = None
             logs["logs"] = e
         finally:
-            with open(os.path.join(path_log, str(self.batch_group) + ".json"), "w+") as log_file:
-                json.dump(logs, log_file)
+            self.write_file(py_object=logs,
+                            dir_path=path_log,
+                            file_name=str(self.batch_group) + ".json")
         if logs["error"] is True:
             print(
                 "Error during hpds data querying of {phs}, batch_group: {batch_group} \n{exception} \nQuitting program".format(
@@ -165,10 +200,12 @@ class RunPheWAS:
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
         # TODO: maybe adding the count of variables discarded because below threshold to get this information somewhere
-        pd.DataFrame.from_dict({"variable_name": self.study_df.columns}) \
-            .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns)) \
-            .to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
-                    index=False)
+        quality_checked = pd.DataFrame.from_dict({"variable_name": self.study_df.columns}) \
+            .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns))
+        self.write_file(quality_checked,
+                        dir_path=path_results,
+                        file_name=str(self.batch_group) + ".csv",
+                        index=False)
         return
     
     def descriptive_statistics(self):
@@ -192,8 +229,10 @@ class RunPheWAS:
         path_results = os.path.join(self.results_path, "descriptive_statistics", self.phs)
         if not os.path.isdir(path_results):
             os.makedirs(path_results)
-        self.descriptive_statistics_df.to_csv(os.path.join(path_results, str(self.batch_group) + ".csv"),
-                                              index=False)
+        self.write_file(self.descriptive_statistics_df,
+                        dir_path=path_results,
+                        file_path=str(self.batch_group) + ".zip",
+                        index=False)
     
     def data_type_management(self):
         categorical_variables = [var_name for var_name in self.filtered_df.columns if
@@ -268,15 +307,18 @@ class RunPheWAS:
         dir_results = os.path.join(self.results_path, "association_statistics", self.phs)
         if not os.path.isdir(dir_results):
             os.makedirs(dir_results)
-        df_all_results.pipe(var_name_to_id) \
-            .to_csv(os.path.join(dir_results, str(self.batch_group) + ".csv"),
-                    index=False)
+        df_all_results = var_name_to_id(df_all_results)
+        self.write_file(df_all_results,
+                        dir_path=dir_results,
+                        file_path=str(self.batch_group) + ".zip",
+                        index=False)
+        
         dir_logs = os.path.join(self.results_path, "logs_association_statistics", self.phs)
         if not os.path.isdir(dir_logs):
             os.makedirs(dir_logs)
-        path_logs = os.path.join(dir_logs, str(self.batch_group) + ".json")
-        with open(path_logs, "w+") as f:
-            json.dump(dic_logs_dependent_var, f)
+        self.write_file(dic_logs_dependent_var,
+                        dir_path=dir_logs,
+                        file_name=str(self.batch_group) + ".json")
         return
 
 
