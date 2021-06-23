@@ -15,7 +15,6 @@ class CompilePheWAS_Results():
     
     def __init__(self,
                  path_exp):
-        
         self.path_logs_stats = os.path.join(path_exp, "logs_association_statistics")
         self.path_logs_hpds = os.path.join(path_exp, "logs_association_statistics")
         self.path_association_statistics_results = os.path.join(path_exp, "association_statistics")
@@ -26,7 +25,7 @@ class CompilePheWAS_Results():
             if args[0].dropbox is True:
                 # TODO: to be implemented eventually
                 pass
-            return function(**args, **kwargs)
+            return function(*args, **kwargs)
     
         return _download_dropbox
 
@@ -48,24 +47,24 @@ class CompilePheWAS_Results():
             raise ExtensionError
         return output
 
-    def get_logs_hpds():
+    def get_logs_hpds(self):
         pass
         return
     
-    def get_logs_quality_checking():
+    def get_logs_quality_checking(self):
         pass
         return
     
-    def get_logs_statistics():
+    def get_logs_statistics(self):
         pass
         return
     
-    def get_descriptive_statistics():
+    def get_descriptive_statistics(self):
         pass
         return
     
-    def compile_association_statistics():
-        pass
+    def compile_association_statistics(self):
+        # pd.read_csv(self.path_association_statistics_results)
         return
         
 

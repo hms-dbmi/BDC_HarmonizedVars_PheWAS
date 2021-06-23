@@ -2,7 +2,6 @@ from typing import Union, List
 import contextlib
 import io
 import re
-import time
 
 import pandas as pd
 import numpy as np

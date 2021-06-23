@@ -24,37 +24,11 @@ from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 def upload_dropbox(function):
     def inner_function(*args, **kwargs):
-        if args[0].parameters_exp["dropbox"] is True:
+        if args[0].parameters_exp["storage_dropbox"] is True:
             #TODO: to be implemented eventually
             pass
         return function(*args, **kwargs)
     return inner_function
-
-
-def var_name_to_id(df_to_map: pd.DataFrame) -> pd.DataFrame:
-    df_dependent_vars_id = pd.read_csv("env_variables/list_harmonized_variables.csv") \
-        .set_index("var_name", drop=True)["dependent_var_id"].to_frame()
-    df_independent_vars_id = pd.read_csv("env_variables/list_eligible_variables.csv") \
-        .set_index("var_name", drop=True)["independent_var_id"].to_frame()
-    df_mapped = df_to_map.join(df_independent_vars_id, how="left", on="independent_var_name") \
-        .join(df_dependent_vars_id, how="left", on="dependent_var_name") \
-        .drop(["dependent_var_name", "independent_var_name"], axis=1)
-    if df_mapped[["dependent_var_id", "independent_var_id"]].isna().any() is True:
-        raise MappingError("Issue when mapping variables from names to ids")
-    return df_mapped
-
-
-def var_id_to_name(df_to_map: pd.DataFrame):
-    df_dependent_vars_id = pd.read_csv("env_variables/list_harmonized_variables.csv") \
-        .set_index("var_name", drop=True)["dependent_var_id"].to_frame()
-    df_independent_vars_id = pd.read_csv("env_variables/list_eligible_variables.csv") \
-        .set_index("var_name", drop=True)["independent_var_id"].to_frame()
-    df_mapped = df_to_map.join(df_independent_vars_id, how="left", on="independent_var_id") \
-        .join(df_dependent_vars_id, how="left", on="dependent_var_id") \
-        .drop(["dependent_var_id", "independent_var_id"], axis=1)
-    if df_mapped[["dependent_var_name", "independent_var_name"]].isna().any() is True:
-        raise MappingError("Issue when mapping variables from ids to names")
-    return df_mapped
 
 
 class RunPheWAS:
@@ -69,23 +43,27 @@ class RunPheWAS:
         self.token = token
         self.picsure_network_url = picsure_network_url
         self.resource_id = resource_id
-        self.resource = None
         self.phs = phs
         self.batch_group = batch_group
         self.parameters_exp = parameters_exp
-        self.results_path = os.path.join(parameters_exp["path_results"], time_launched)
-        eligible_variables = pd.read_csv("env_variables/list_eligible_variables.csv")
-        list_harmonized_variables = pd.read_csv("env_variables/list_harmonized_variables.csv")
+        self.results_path = os.path.join(parameters_exp["results_path"], time_launched)
+        mapping_independent_variables = pd.read_csv("env_variables/df_eligible_variables.csv")\
+            .loc[lambda df: (df["phs"] == phs) & (df["batch_group"] == batch_group), :]\
+            .set_index("var_name", drop=True)["independent_var_id"]
         if self.parameters_exp["harmonized_variables_types"] == "categorical":
-            self.dependent_var_names = list_harmonized_variables.loc[
-                lambda df: df["categorical"] == True, "var_name"].tolist()
+            mapping_dependent_variables = pd.read_csv("env_variables/df_harmonized_variables.csv") \
+                                                 .loc[lambda df: df["categorical"] == True, :]\
+                                                 .set_index("var_name", drop=True)["dependent_var_id"]
         elif self.parameters_exp["harmonized_variables_types"] == "all":
-            self.dependent_var_names = list_harmonized_variables.loc[:, "var_name"].tolist()
+            mapping_dependent_variables = pd.read_csv("env_variables/df_harmonized_variables.csv") \
+                .set_index("var_name", drop=True)["dependent_var_id"]
         else:
             raise ValueError("harmonized_variables_types should be either 'categorical' or 'all'")
-        self.independent_var_names = eligible_variables \
-            .loc[lambda df: (df["phs"] == phs) & (df["batch_group"] == batch_group), "var_name"] \
-            .tolist()
+        self.dependent_var_names = mapping_dependent_variables.index.tolist()
+        self.independent_var_names = mapping_independent_variables.index.tolist()
+        self.mapping_variables = mapping_independent_variables \
+            .append(mapping_dependent_variables) \
+            .rename("var_id")
         self.var_types = None
         self.study_df = None
         self.filtered_df = None
@@ -94,23 +72,6 @@ class RunPheWAS:
         self.descriptive_statistics_df = None
         self.crosscount_filtered_independent_var_names = None
     
-    @staticmethod
-    @upload_dropbox
-    def write_file(py_object, file_name, dir_path, *args, **kwargs):
-        file_path = os.path.join(dir_path, file_name)
-        extension_regex = re.compile(r"\.[a-z]+$")
-        extension = re.search(extension_regex, file_path).group()
-        if extension == ".csv":
-            py_object.to_csv(file_path, *args, **kwargs)
-        elif extension == ".json":
-            with open(file_path, "w+") as json_file:
-                json.dump(py_object, json_file, *args, **kwargs)
-        elif extension == ".txt":
-            with open(file_path, "w+") as text_file:
-                text_file.write(py_object)
-        else:
-            raise ExtensionError
-        
     @staticmethod
     def logs_creating(exception=None):
         error = False if exception is None else True
@@ -124,6 +85,55 @@ class RunPheWAS:
         }
         return logs
     
+    def var_name_to_id_df(self, df_to_map: pd.DataFrame, colnames) -> pd.DataFrame:
+        df_mapped = df_to_map.replace({col: self.mapping_variables for col in colnames})
+        if df_mapped[colnames].isna().any() is True:
+            raise MappingError("Issue when mapping variables from names to ids")
+        df_mapped = df_mapped.rename({col: re.sub("name", "id", col) for col in colnames}, axis=1)
+        return df_mapped
+
+    def var_id_to_name_df(self, df_to_map: pd.DataFrame, colnames):
+        reverse_mapping = {v: k for k, v in self.mapping_variables.items()}
+        df_mapped = df_to_map.replace({col: reverse_mapping for col in colnames})
+        if df_mapped[colnames].isna().any() is True:
+            raise MappingError("Issue when mapping variables from ids to names")
+        df_mapped = df_mapped.rename({col: re.sub("id", "name", col) for col in colnames}, axis=1)
+        return df_mapped
+
+    @upload_dropbox
+    def write_file(self, py_object, file_name, dir_path, map_colnames=False, colnames=None, *args, **kwargs):
+        file_path = os.path.join(dir_path, file_name)
+        extension_regex = re.compile(r"\.[a-z]+$")
+        extension = re.search(extension_regex, file_path).group()
+        if extension in [".csv", ".zip"]:
+            if map_colnames is True:
+                py_object = self.var_name_to_id_df(py_object, colnames)
+            py_object.to_csv(file_path, *args, **kwargs)
+        elif extension == ".json":
+            with open(file_path, "w+") as json_file:
+                json.dump(py_object, json_file, *args, **kwargs)
+        elif extension == ".txt":
+            with open(file_path, "w+") as text_file:
+                text_file.write(py_object)
+        else:
+            raise ExtensionError
+        
+    @staticmethod
+    def logs_to_df(dic_logs: dict) -> pd.DataFrame:
+        logs_df = pd.DataFrame.from_dict({
+            (dep, ind): logs for dep, dic_log_ind in dic_logs.items() for ind, logs in dic_log_ind.items()
+        }, orient="index") \
+            .rename_axis(["dependent_var_name", "independent_var_name"], axis=0) \
+            .reset_index(drop=False)
+        return logs_df
+    
+    def var_name_to_id_logs(self):
+        pass
+    
+    def var_id_to_names_logs(self):
+        pass
+    
+    
     def querying_data(self):
         path_log = os.path.join(self.results_path, "logs_hpds_query", self.phs)
         path_data = os.path.join("data", self.phs)
@@ -136,10 +146,10 @@ class RunPheWAS:
         }
         try:
             if self.parameters_exp["online"] is True:
-                self.resource = get_HPDS_connection(self.token,
-                                                    self.picsure_network_url,
-                                                    self.resource_id)
-                self.study_df = query_runner(resource=self.resource,
+                resource = get_HPDS_connection(self.token,
+                                               self.picsure_network_url,
+                                               self.resource_id)
+                self.study_df = query_runner(resource=resource,
                                              to_select=self.dependent_var_names,
                                              to_anyof=self.independent_var_names,
                                              result_type="DataFrame",
@@ -152,18 +162,14 @@ class RunPheWAS:
                 if not os.path.isdir(path_data):
                     os.makedirs(path_data)
                 self.write_file(py_object=self.study_df,
-                                dir_path=path_data,
                                 file_name=str(self.batch_group) + ".csv",
+                                dir_path=path_data,
                                 index=False)
             
         except (EmptyDataFrameError, HpdsHTTPError) as exception:
-            logs["error"] = True
-            e = repr(exception)
-            logs["logs"] = e
+            logs = RunPheWAS.logs_creating(exception)
         else:
-            logs["error"] = False
-            e = None
-            logs["logs"] = e
+            logs = RunPheWAS.logs_creating()
         finally:
             self.write_file(py_object=logs,
                             dir_path=path_log,
@@ -173,7 +179,7 @@ class RunPheWAS:
                 "Error during hpds data querying of {phs}, batch_group: {batch_group} \n{exception} \nQuitting program".format(
                     phs=self.phs,
                     batch_group=self.batch_group,
-                    exception=e))
+                    exception=repr(exception)))
             sys.exit()
         return
     
@@ -181,20 +187,21 @@ class RunPheWAS:
         self.filtered_df = quality_filtering(self.study_df, self.parameters_exp["Minimum number observations"])
         self.filtered_independent_var_names = list(set(self.filtered_df.columns) - set(self.dependent_var_names))
         self.filtered_dependent_var_names = list(set(self.filtered_df.columns) - set(self.independent_var_names))
-        path_results = os.path.join(self.results_path, "quality_checking", self.phs)
-        if not os.path.isdir(path_results):
-            os.makedirs(path_results)
+        results_path = os.path.join(self.results_path, "quality_checking", self.phs)
+        if not os.path.isdir(results_path):
+            os.makedirs(results_path)
         # TODO: maybe adding the count of variables discarded because below threshold to get this information somewhere
-        quality_checked = pd.DataFrame.from_dict({"variable_name": self.study_df.columns}) \
-            .assign(kept=lambda df: df["variable_name"].isin(self.filtered_df.columns))
+        quality_checked = pd.DataFrame.from_dict({"var_name": self.study_df.columns}) \
+            .assign(kept=lambda df: df["var_name"].isin(self.filtered_df.columns))
         self.write_file(quality_checked,
-                        dir_path=path_results,
+                        dir_path=results_path,
                         file_name=str(self.batch_group) + ".csv",
+                        map_colnames=self.parameters_exp["var_name_to_id_df"],
+                        colnames=["var_name"],
                         index=False)
         return
     
     def descriptive_statistics(self):
-        
         self.descriptive_statistics_df = get_descriptive_statistics(
             self.filtered_df,
             self.filtered_independent_var_names
@@ -203,7 +210,7 @@ class RunPheWAS:
             .drop_duplicates() \
             .set_index("var_name")["var_type"] \
             .to_dict()
-        dependent_var_types = pd.read_csv("env_variables/list_harmonized_variables.csv",
+        dependent_var_types = pd.read_csv("env_variables/df_harmonized_variables.csv",
                                           index_col=0) \
             .loc[self.filtered_dependent_var_names, "var_type"] \
             .to_dict()
@@ -211,12 +218,14 @@ class RunPheWAS:
                           **independent_var_types
                           }
         
-        path_results = os.path.join(self.results_path, "descriptive_statistics", self.phs)
-        if not os.path.isdir(path_results):
-            os.makedirs(path_results)
+        results_path = os.path.join(self.results_path, "descriptive_statistics", self.phs)
+        if not os.path.isdir(results_path):
+            os.makedirs(results_path)
         self.write_file(self.descriptive_statistics_df,
-                        dir_path=path_results,
-                        file_path=str(self.batch_group) + ".zip",
+                        file_name=str(self.batch_group) + ".zip",
+                        dir_path=results_path,
+                        map_colnames=self.parameters_exp["var_name_to_id_df"],
+                        colnames=["var_name"],
                         index=False)
     
     def data_type_management(self):
@@ -292,18 +301,22 @@ class RunPheWAS:
         dir_results = os.path.join(self.results_path, "association_statistics", self.phs)
         if not os.path.isdir(dir_results):
             os.makedirs(dir_results)
-        df_all_results = var_name_to_id(df_all_results)
         self.write_file(df_all_results,
+                        file_name=str(self.batch_group) + ".zip",
                         dir_path=dir_results,
-                        file_path=str(self.batch_group) + ".zip",
+                        map_colnames=self.parameters_exp["var_name_to_id_df"],
+                        colnames=["dependent_var_name", "independent_var_name"],
                         index=False)
         
         dir_logs = os.path.join(self.results_path, "logs_association_statistics", self.phs)
         if not os.path.isdir(dir_logs):
             os.makedirs(dir_logs)
-        self.write_file(dic_logs_dependent_var,
+        df_logs_dependent_var = self.logs_to_df(dic_logs_dependent_var)
+        self.write_file(df_logs_dependent_var,
+                        file_name=str(self.batch_group) + ".zip",
                         dir_path=dir_logs,
-                        file_name=str(self.batch_group) + ".json")
+                        map_colnames=self.parameters_exp["var_name_to_id_df"],
+                        colnames=["dependent_var_name", "independent_var_name"])
         return
 
 
@@ -332,6 +345,21 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
+    if os.environ["TEST"] == "True":
+        # pass
+        PheWAS.dependent_var_names = [
+            "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
+            # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
+            # "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
+            # "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
+            # "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
+            "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
+            ]
+        PheWAS.independent_var_names = PheWAS.independent_var_names[1:10]
+        # PheWAS.dependent_var_names = ["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\\"]
+        # PheWAS.independent_var_names = ["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Data contain extensive medical history information of subjects (all > 65 years of age)\\K-channel blockers to enhance insulin se\\"]
+        # batch_group=4 phs=phs000287
+
     print(phs, batch_group)
     print("querying the data", datetime.now().time().strftime("%H:%M:%S"))
     PheWAS.querying_data()

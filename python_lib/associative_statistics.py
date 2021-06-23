@@ -442,8 +442,8 @@ class associationStatistics():
         return statistics[list_columns_names_export]
     
 if __name__ == '__main__':
-    var_test = "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
-    ind_test = "\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Brief up-date on general health status and changes that may have occurred since last visit. Data were collected at year 17 (6-months phone interview follow-up).\\DAYS IN BED FOR ILLNESS OR INJURY\\"
+    var_test = pd.Series(["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"])
+    ind_test = pd.Series(["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Brief up-date on general health status and changes that may have occurred since last visit. Data were collected at year 17 (6-months phone interview follow-up).\\DAYS IN BED FOR ILLNESS OR INJURY\\"])
     
     instance = associationStatistics(var_test, ind_test)
     
