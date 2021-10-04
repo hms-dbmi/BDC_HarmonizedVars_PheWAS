@@ -1,83 +1,83 @@
-harmonized_complete_name,renaming_variables,renaming_variables_nice
-\DCC Harmonized data set\01 - Demographics\A distinct subgroup within a study  generally indicating subjects who share similar characteristics due to study design. Subjects may belong to only one subcohort.\,study_subgroup,Study subgroup
-\DCC Harmonized data set\01 - Demographics\Harmonized race category of participant.\,race,Race
-\DCC Harmonized data set\01 - Demographics\Indicator of Hispanic or Latino ethnicity.\,latino_ethnicity,Ethnicity (latino)
-\DCC Harmonized data set\01 - Demographics\Recruitment/field center  baseline clinic  or geographic region.\,geographic_center,Geographic Region
-\DCC Harmonized data set\01 - Demographics\Subject sex  as recorded by the study.\,sex,Sex
-\DCC Harmonized data set\01 - Demographics\classification of Hispanic/Latino background for Hispanic/Latino subjects where country or region of origin information is available\,latino_background,Latino background
-\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of four values: maximum of multiple thickness estimates from the left far wall  left near wall  right far wall  and right near wall.\,carotida_thickness_4values,Carotida thickness (4 values)
-\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of two values: mean of multiple thickness estimates from the left far wall and from the right far wall.\,carotida_thickness_2values,Carotida thickness (2 values)
-\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcification (CAC) score using Agatston scoring of CT scan(s) of coronary arteries\,coronary_calcification,Coronary calcification
-\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcium volume using CT scan(s) of coronary arteries\,coronary_calcium_volume,Coronary calcium volume
-\DCC Harmonized data set\02 - Atherosclerosis\Extent of narrowing of the carotid artery.\,extent_narrowing_carotid,Extent of coronary artery narrowing
-\DCC Harmonized data set\02 - Atherosclerosis\Presence or absence of carotid plaque.\,carotid_plaque,Carotid plaque presence
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_score_1\,,
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_volume_1\,,
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_plaque_1\,,
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_stenosis_1\,,
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_1\,,
-\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_2\,,
-\DCC Harmonized data set\03 - Baseline common covariates\Body height at baseline.\,height,Height
-\DCC Harmonized data set\03 - Baseline common covariates\Body mass index calculated at baseline.\,bmi,BMI
-\DCC Harmonized data set\03 - Baseline common covariates\Body weight at baseline.\,weight,Weight
-\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject currently smokes cigarettes.\,current_smoker,Current smoker
-\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject ever regularly smoked cigarettes.\,ever_smoker,Ever smoker
-\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of bmi_baseline_1\,,
-\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of current_smoker_baseline_1\,,
-\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of ever_smoker_baseline_1\,,
-\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of height_baseline_1\,,
-\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of weight_baseline_1\,,
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of basophils in the blood (bld).\,basophils,Basophilis concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of eosinophils in the blood (bld).\,eosinophils,Esoinophilis concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of lymphocytes in the blood (bld).\,lymphocytes,Lymphocytes concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of monocytes in the blood (bld).\,monocytes,Monocytes concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of neutrophils in the blood (bld).\,neutrophils,Neutropghilis concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of platelets in the blood (bld).\,platelets,Platelets concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of red blood cells in the blood (bld).\,erythrocytes,Erythrocytes concentration
-\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of white blood cells in the blood (bld).\,leucocytes,Leucocytes concentration
-\DCC Harmonized data set\04 - Blood cell count\Measurement of hematocrit  the fraction of volume (vfr) of blood (bld) that is composed of red blood cells.\,hematocrit,Hematocrit
-\DCC Harmonized data set\04 - Blood cell count\Measurement of mass per volume  or mass concentration (mcnc)  of hemoglobin in the blood (bld).\,hemoglobin,Hemoglobin
-\DCC Harmonized data set\04 - Blood cell count\Measurement of the average mass (entmass) of hemoglobin per red blood cell(rbc)  known as mean corpuscular hemoglobin (MCH).\,mean_corpuscular_hemoglobin,Mean corpuscular hemoglobin
-\DCC Harmonized data set\04 - Blood cell count\Measurement of the average volume (entvol) of red blood cells (rbc)  known as mean corpuscular volume (MCV).\,mean_corpuscular_volume,Mean corpuscular volume
-\DCC Harmonized data set\04 - Blood cell count\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\,mean_corpuscular_hemoglobin_concentration,Mean corpuscular haemoglobin concentration
-\DCC Harmonized data set\04 - Blood cell count\Measurement of the mean volume (entvol) of platelets in the blood (bld)  known as mean platelet volume (MPV or PMV).\,platelets_volume,Platelets volume
-\DCC Harmonized data set\04 - Blood cell count\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\,red_cell_width_distribution,Red cell width distribution
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of basophil_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of eosinophil_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of hematocrit_vfr_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of hemoglobin_mcnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of lymphocyte_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of mch_entmass_rbc_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of mchc_mcnc_rbc_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of mcv_entvol_rbc_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of monocyte_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of neutrophil_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of platelet_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of pmv_entvol_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of rbc_ncnc_bld_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of rdw_ratio_rbc_1\,,
-\DCC Harmonized data set\04 - Blood cell count\age at measurement of wbc_ncnc_bld_1\,,
-\DCC Harmonized data set\05 - Blood pressure\Indicator for use of antihypertensive medication at the time of blood pressure measurement.\,antihypertensive,Antihypertensive drugs
-\DCC Harmonized data set\05 - Blood pressure\Resting diastolic blood pressure from the upper arm in a clinical setting.\,diastolic_blood_pressure,Diastolic blood pressure
-\DCC Harmonized data set\05 - Blood pressure\Resting systolic blood pressure from the upper arm in a clinical setting.\,systolic_blood_pressure,Systolic blood pressure
-\DCC Harmonized data set\05 - Blood pressure\age at measurement of antihypertensive_meds_1\,,
-\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_diastolic_1\,,
-\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_systolic_1\,,
-\DCC Harmonized data set\06 - Lipids\Blood mass concentration of high-density lipoprotein cholesterol\,hdl,HDL
-\DCC Harmonized data set\06 - Lipids\Blood mass concentration of low-density lipoprotein cholesterol\,ldl,LDL
-\DCC Harmonized data set\06 - Lipids\Blood mass concentration of total cholesterol\,total_cholesterol,Total cholesterol
-\DCC Harmonized data set\06 - Lipids\Blood mass concentration of triglycerides\,triglycerides,Triglycerides
-\DCC Harmonized data set\06 - Lipids\Indicates whether participant fasted for at least eight hours prior to blood draw to measure lipids phenotypes.\,fasted_before_lipids,Fasted before lipids measurements
-\DCC Harmonized data set\06 - Lipids\Indicates whether participant was taking any lipid-lowering medication at blood draw to measure lipids phenotypes\,lipid_lowering_medication,Lipid-lowering medications
-\DCC Harmonized data set\06 - Lipids\age at measurement of fasting_lipids_1\,,
-\DCC Harmonized data set\06 - Lipids\age at measurement of hdl_1\,,
-\DCC Harmonized data set\06 - Lipids\age at measurement of ldl_1\,,
-\DCC Harmonized data set\06 - Lipids\age at measurement of lipid_lowering_medication_1\,,
-\DCC Harmonized data set\06 - Lipids\age at measurement of total_cholesterol_1\,,
-\DCC Harmonized data set\06 - Lipids\age at measurement of triglycerides_1\,,
-\DCC Harmonized data set\07 - Venous Thromboembolism Event\Age of subject at the start of the follow up period during which venous thromboembolism (VTE) events were reviewed and adjudicated.\,,
-\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject experienced a venous thromboembolism event (VTE) that was verified by adjudication or by medical professionals.\,vte_occurrence,VTE occurence
-\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject had a venous thromboembolism (VTE) event prior to the start of the medical review process (including self-reported events).\,vte_history,VTE history
-\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_case_status_1\,,
-\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_prior_history_1\,,
-\DCC Harmonized data set\TECHNICAL-VARS\SUBJECT_ID\,subject_id,Subject ID
+harmonized_complete_name,renaming_variables,renaming_variables_nice,category,var_type,modalities,kept
+\DCC Harmonized data set\01 - Demographics\A distinct subgroup within a study  generally indicating subjects who share similar characteristics due to study design. Subjects may belong to only one subcohort.\,study_subgroup,Study subgroup,Administrative,multicategorical,"[WHI Observational Study, WHI Clinical Trial, ARIC: No Subcohort Structure, COPDGene: No Subcohort Structure, MESA Classic Cohort, FHS Original Cohort, FHS Offspring Cohort, CHS Original Cohort, FHS Third Generation Cohort, JHS: No Subcohort Structure, SAS: No Subcohort Structure, GENOA African-American Cohort, MESA Family Cohort, GENOA European-American Cohort, CRA: No Subcohort Structure, CFS: No Subcohort Structure, HVH: No Subcohort Structure, Amish Heredity and Phenotype Intervention Heart Study, CHS Additional African-American Cohort, FHS Omni Cohort 1, FHS Omni Cohort 2, Amish Longevity Study, MESA Air New Recruit Cohort, FHS New Offspring Spouse Cohort, Amish Family Wellness Study]",FALSE
+\DCC Harmonized data set\01 - Demographics\Harmonized race category of participant.\,race,Race,Demographics,multicategorical,"[White or Caucasian, Black or African American, Other race, Asian, Native Hawaiian or other Pacific Islander, American Indian, Alaskan Native, or Native American, More than one race]",TRUE
+\DCC Harmonized data set\01 - Demographics\Indicator of Hispanic or Latino ethnicity.\,latino_ethnicity,Ethnicity (latino),Demographics,multicategorical,"[not Hispanic or Latino, Hispanic or Latino, ethnicity component dbGaP variable values for a subject were inconsistent/contradictory (e.g. over multiple visits)]",TRUE
+\DCC Harmonized data set\01 - Demographics\Recruitment/field center  baseline clinic  or geographic region.\,geographic_center,Geographic Region,Demographics,multicategorical,"[recruitment from West region of the USA for WHI (Womens Health Initiative), recruitment from South region of the USA for WHI (Womens Health Initiative), recruitment from Northeast region of the USA for WHI (Womens Health Initiative), recruitment from Midwest region of the USA for WHI (Womens Health Initiative), field center D representing one of four anonymized centers (Forsyth County, NC, USA; Jackson, MS, USA; the northwest suburbs of Minneapolis, MN, USA; and Washington County, MD, USA) where baseline exam was conducted for ARIC (Atherosclerosis Risk in Communities), field center A representing one of four anonymized centers (Forsyth County, NC, USA; Jackson, MS, USA; the northwest suburbs of Minneapolis, MN, USA; and Washington County, MD, USA) where baseline exam was conducted for ARIC (Atherosclerosis Risk in Communities), field center B representing one of four anonymized centers (Forsyth County, NC, USA; Jackson, MS, USA; the northwest suburbs of Minneapolis, MN, USA; and Washington County, MD, USA) where baseline exam was conducted for ARIC (Atherosclerosis Risk in Communities), field center C representing one of four anonymized centers (Forsyth County, NC, USA; Jackson, MS, USA; the northwest suburbs of Minneapolis, MN, USA; and Washington County, MD, USA) where baseline exam was conducted for ARIC (Atherosclerosis Risk in Communities), recruitment from urban and rural areas of Hinds county, MS, USA for JHS (Jackson Heart Study), recruitment from Jackson, MS, US, field center/baseline clinic at University of California, Los Angeles, CA, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), recruitment from Rochester, MN, US, clinic at Davis University (Sacramento County, CA, USA) for CHS (Cardiovascular Health Study), clinic at Bowman Gray University (Forsyth County, NC, USA) for CHS (Cardiovascular Health Study), field center/baseline clinic at Northwestern University, IL, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), clinical center C09 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), field center/baseline clinic at Columbia University, NY, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), field center/baseline clinic at Johns Hopkins University, MD, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), clinic at University of Pittsburgh (Pittsburgh, PA, USA) for CHS (Cardiovascular Health Study), clinic at Johns Hopkins University (Washington County, MD, USA) for CHS (Cardiovascular Health Study), field center/baseline clinic at University of Minnesota, MN, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), field center/baseline clinic at Wake Forest University, NC, USA for MESA (Multi-Ethnic Study of Atherosclerosis Cohort), clinical center C08 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C05 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), recruitment census region of Northwest Upola in Samoa for SAS (Genome-wide Association Study of Adiposity in Samoans), recruitment census region including rest of Upola in Samoa for SAS (Genome-wide Association Study of Adiposity in Samoans), recruitment census region of Savaii in Samoa for SAS (Genome-wide Association Study of Adiposity in Samoans), clinical center C03 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), recruitment census region of Apia Urban Area in Samoa for SAS (Genome-wide Association Study of Adiposity in Samoans), clinical center C16 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C07 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C13 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C06 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C15 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C21 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C02 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C04 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C11 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), recruitment from urban and rural areas of Madison county, MS, USA for JHS (Jackson Heart Study), clinical center C10 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C01 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C14 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), recruitment from urban and rural areas of Rankin county, MS, USA for JHS (Jackson Heart Study), clinical center C17 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), recruitment from unknown county in MS, USA for JHS (Jackson Heart Study), clinical center C18 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C12 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C20 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD), clinical center C19 representing one of 21 de-identified clinical centers for COPDGene (Genetic Epidemiology of COPD)]",TRUE
+\DCC Harmonized data set\01 - Demographics\Subject sex  as recorded by the study.\,sex,Sex,Demographics,binary,"[Female, Male]",TRUE
+\DCC Harmonized data set\01 - Demographics\classification of Hispanic/Latino background for Hispanic/Latino subjects where country or region of origin information is available\,latino_background,Latino background,Demographics,multicategorical,"[Mexican, from Costa Rica, Puerto Rican, Dominican, Cuban, South American, Central American]",TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of four values: maximum of multiple thickness estimates from the left far wall  left near wall  right far wall  and right near wall.\,carotida_thickness_4values,Carotida thickness (4 values),Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Common carotid intima-media thickness  calculated as the mean of two values: mean of multiple thickness estimates from the left far wall and from the right far wall.\,carotida_thickness_2values,Carotida thickness (2 values),Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcification (CAC) score using Agatston scoring of CT scan(s) of coronary arteries\,coronary_calcification,Coronary calcification,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Coronary artery calcium volume using CT scan(s) of coronary arteries\,coronary_calcium_volume,Coronary calcium volume,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Extent of narrowing of the carotid artery.\,extent_narrowing_carotid,Extent of coronary artery narrowing,Clinical,multicategorical,"[None, 1%-24%, 25%-49%, 50%-74%, 75%-99%, 100%]",TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\Presence or absence of carotid plaque.\,carotid_plaque,Carotid plaque presence,Clinical,binary,"[Plaque not present, Plaque present]",TRUE
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_score_1\,,,,,,
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cac_volume_1\,,,,,,
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_plaque_1\,,,,,,
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of carotid_stenosis_1\,,,,,,
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_1\,,,,,,
+\DCC Harmonized data set\02 - Atherosclerosis\age at measurement of cimt_2\,,,,,,
+\DCC Harmonized data set\03 - Baseline common covariates\Body height at baseline.\,height,Height,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\03 - Baseline common covariates\Body mass index calculated at baseline.\,bmi,BMI,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\03 - Baseline common covariates\Body weight at baseline.\,weight,Weight,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject currently smokes cigarettes.\,current_smoker,Current smoker,History,binary,"[Does not currently smoke cigarettes, Currently smokes cigarettes]",TRUE
+\DCC Harmonized data set\03 - Baseline common covariates\Indicates whether subject ever regularly smoked cigarettes.\,ever_smoker,Ever smoker,History,binary,"[Current or former cigarette smoker, Never a cigarette smoker]",TRUE
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of bmi_baseline_1\,,,,,,
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of current_smoker_baseline_1\,,,,,,
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of ever_smoker_baseline_1\,,,,,,
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of height_baseline_1\,,,,,,
+\DCC Harmonized data set\03 - Baseline common covariates\age at measurement of weight_baseline_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of basophils in the blood (bld).\,basophils,Basophilis concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of eosinophils in the blood (bld).\,eosinophils,Eosinophilis concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of lymphocytes in the blood (bld).\,lymphocytes,Lymphocytes concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of monocytes in the blood (bld).\,monocytes,Monocytes concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of neutrophils in the blood (bld).\,neutrophils,Neutrophilis concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of platelets in the blood (bld).\,platelets,Platelets concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of red blood cells in the blood (bld).\,erythrocytes,Erythrocytes concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Count by volume  or number concentration (ncnc)  of white blood cells in the blood (bld).\,leucocytes,Leucocytes concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of hematocrit  the fraction of volume (vfr) of blood (bld) that is composed of red blood cells.\,hematocrit,Hematocrit,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of mass per volume  or mass concentration (mcnc)  of hemoglobin in the blood (bld).\,hemoglobin,Hemoglobin,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the average mass (entmass) of hemoglobin per red blood cell(rbc)  known as mean corpuscular hemoglobin (MCH).\,mean_corpuscular_hemoglobin,Mean corpuscular hemoglobin,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the average volume (entvol) of red blood cells (rbc)  known as mean corpuscular volume (MCV).\,mean_corpuscular_volume,Mean corpuscular volume,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\,mean_corpuscular_hemoglobin_concentration,Mean corpuscular haemoglobin concentration,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the mean volume (entvol) of platelets in the blood (bld)  known as mean platelet volume (MPV or PMV).\,platelets_volume,Platelets volume,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\,red_cell_width_distribution,Red cell width distribution,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of basophil_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of eosinophil_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of hematocrit_vfr_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of hemoglobin_mcnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of lymphocyte_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mch_entmass_rbc_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mchc_mcnc_rbc_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of mcv_entvol_rbc_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of monocyte_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of neutrophil_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of platelet_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of pmv_entvol_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of rbc_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of rdw_ratio_rbc_1\,,,,,,
+\DCC Harmonized data set\04 - Blood cell count\age at measurement of wbc_ncnc_bld_1\,,,,,,
+\DCC Harmonized data set\05 - Blood pressure\Indicator for use of antihypertensive medication at the time of blood pressure measurement.\,antihypertensive,Antihypertensive drugs,Drugs,binary,"[Not taking antihypertensive medication, Taking antihypertensive medication]",TRUE
+\DCC Harmonized data set\05 - Blood pressure\Resting diastolic blood pressure from the upper arm in a clinical setting.\,diastolic_blood_pressure,Diastolic blood pressure,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\05 - Blood pressure\Resting systolic blood pressure from the upper arm in a clinical setting.\,systolic_blood_pressure,Systolic blood pressure,Clinical,continuous,nan,TRUE
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of antihypertensive_meds_1\,,,,,,
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_diastolic_1\,,,,,,
+\DCC Harmonized data set\05 - Blood pressure\age at measurement of bp_systolic_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of high-density lipoprotein cholesterol\,hdl,HDL,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of low-density lipoprotein cholesterol\,ldl,LDL,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of total cholesterol\,total_cholesterol,Total cholesterol,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\06 - Lipids\Blood mass concentration of triglycerides\,triglycerides,Triglycerides,Biological,continuous,nan,TRUE
+\DCC Harmonized data set\06 - Lipids\Indicates whether participant fasted for at least eight hours prior to blood draw to measure lipids phenotypes.\,fasted_before_lipids,Fasted before lipids measurements,Biological,binary,"[Participant fasted for at least eight hours prior to measurement of lipids phenotypes., Participant did not fast, or fasted for fewer than eight hours prior to measurement of lipids phenotypes.]",TRUE
+\DCC Harmonized data set\06 - Lipids\Indicates whether participant was taking any lipid-lowering medication at blood draw to measure lipids phenotypes\,lipid_lowering_medication,Lipid-lowering medications,Drugs,binary,"[Participant was not taking lipid-lowering medication., Participant was taking lipid-lowering medication.]",TRUE
+\DCC Harmonized data set\06 - Lipids\age at measurement of fasting_lipids_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\age at measurement of hdl_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\age at measurement of ldl_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\age at measurement of lipid_lowering_medication_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\age at measurement of total_cholesterol_1\,,,,,,
+\DCC Harmonized data set\06 - Lipids\age at measurement of triglycerides_1\,,,,,,
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\Age of subject at the start of the follow up period during which venous thromboembolism (VTE) events were reviewed and adjudicated.\,,,,,,
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject experienced a venous thromboembolism event (VTE) that was verified by adjudication or by medical professionals.\,vte_occurrence,VTE occurence,Medical history,binary,"[Not known to ever have a VTE event, either self-reported or from medical records, Experienced a VTE event as verified by adjudication or by medical professionals]",TRUE
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\An indicator of whether a subject had a venous thromboembolism (VTE) event prior to the start of the medical review process (including self-reported events).\,vte_history,VTE history,Medical history,binary,"[did not have prior VTE event, had prior VTE event]",TRUE
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_case_status_1\,,,,,,
+\DCC Harmonized data set\07 - Venous Thromboembolism Event\age at measurement of vte_prior_history_1\,,,,,,
+\DCC Harmonized data set\TECHNICAL-VARS\SUBJECT_ID\,subject_id,Subject ID,Administrative,multicategorical,"[WHI Observational Study, WHI Clinical Trial, ARIC: No Subcohort Structure, COPDGene: No Subcohort Structure, MESA Classic Cohort, FHS Original Cohort, FHS Offspring Cohort, CHS Original Cohort, FHS Third Generation Cohort, JHS: No Subcohort Structure, SAS: No Subcohort Structure, GENOA African-American Cohort, MESA Family Cohort, GENOA European-American Cohort, CRA: No Subcohort Structure, CFS: No Subcohort Structure, HVH: No Subcohort Structure, Amish Heredity and Phenotype Intervention Heart Study, CHS Additional African-American Cohort, FHS Omni Cohort 1, FHS Omni Cohort 2, Amish Longevity Study, MESA Air New Recruit Cohort, FHS New Offspring Spouse Cohort, Amish Family Wellness Study]",FALSE
