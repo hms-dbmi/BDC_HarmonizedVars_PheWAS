@@ -322,8 +322,11 @@ class RunPheWAS:
 
 if __name__ == '__main__':
     from env_variables.env_variables import TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID
-    
-    start_time = datetime.now().strftime("%y/%m/%d_%H:%M:%S")
+
+    with open("env_variables/parameters_exp.yaml", "r") as f:
+        parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
+
+    start_time = datetime.now()
     parser = ArgumentParser()
     parser.add_argument("--phs", dest="phs", type=str, default=None)
     parser.add_argument("--batch_group", dest="batch_group", type=int, default=None)
@@ -332,10 +335,8 @@ if __name__ == '__main__':
     phs = args.phs
     batch_group = args.batch_group
     time_launched = args.time_launched
-    monitor_file_name = os.path.join("results", time_launched, "monitor_process.tsv")
+    monitor_file_name = os.path.join(parameters_exp["results_path"], time_launched, "monitor_process.tsv")
     
-    with open("env_variables/parameters_exp.yaml", "r") as f:
-        parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
     
     PheWAS = RunPheWAS(TOKEN,
                        PICSURE_NETWORK_URL,
@@ -345,17 +346,17 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    if os.environ["TEST"] == "True":
+    if False:
         # pass
         PheWAS.dependent_var_names = [
             "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
-            # '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
-            # "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
-            # "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\"
-            # "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\"
+             '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
+             "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
+             "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\",
+             "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\",
             "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
             ]
-        PheWAS.independent_var_names = PheWAS.independent_var_names[1:10]
+        PheWAS.independent_var_names = PheWAS.independent_var_names[1:100]
         # PheWAS.dependent_var_names = ["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\\"]
         # PheWAS.independent_var_names = ["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Data contain extensive medical history information of subjects (all > 65 years of age)\\K-channel blockers to enhance insulin se\\"]
         # batch_group=4 phs=phs000287
@@ -375,8 +376,7 @@ if __name__ == '__main__':
         print("association statistics", datetime.now().time().strftime("%H:%M:%S"))
         PheWAS.association_statistics()
     
-    with open(monitor_file_name, "a") as tsvfile:
-        end_time = datetime.now().strftime("%y/%m/%d_%H:%M:%S")
+    with open(monitor_file_name, "a+") as tsvfile:
+        end_time = datetime.now()
         writer = csv.writer(tsvfile, delimiter="\t", lineterminator="\n")
-        writer.writerow([phs, str(batch_group), str(start_time), str(end_time)])
-
+        writer.writerow([phs, str(batch_group), start_time.strftime("%y/%m/%d %H:%M:%S"), end_time.strftime("%y/%m/%d %H:%M:%S"), str(end_time - start_time).split(".")[0]])

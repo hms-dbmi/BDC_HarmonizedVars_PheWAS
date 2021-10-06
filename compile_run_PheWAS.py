@@ -9,8 +9,6 @@ from python_lib.errors import ExtensionError
 path_exp = "./results_server/results/210612_004737/"
 
 
-
-
 class CompilePheWAS_Results():
     
     def __init__(self,

@@ -7,6 +7,7 @@ import pandas as pd
 from env_variables.env_variables import TOKEN,\
     RESOURCE_ID,\
     PICSURE_NETWORK_URL,\
+    RESULTS_PATH, \
     batch_size
 from python_lib.querying_hpds import get_HPDS_connection,\
     get_whole_dic, \
@@ -87,18 +88,17 @@ parameters = {
     "harmonized_variables_types": "all",
     "online": True,
     "save": False,
-    "results_path": "./results",
+    "results_path": RESULTS_PATH,
     "storage_dropbox": False,
     "var_name_to_id_df": True
 }
 with open("env_variables/parameters_exp.yaml", "w+") as f:
     yaml.dump(parameters, f)
     
-path_export_results = "exports_presentation"
-path_tables = os.path.join(path_export_results, "tables")
-path_images = os.path.join(path_export_results, "images")
+
+path_tables = os.path.join(RESULTS_PATH, "tables")
+path_images = os.path.join(RESULTS_PATH, "images")
 if not os.path.exists(path_tables):
     os.makedirs(path_tables)
 if not os.path.exists(path_images):
     os.makedirs(path_images)
-
