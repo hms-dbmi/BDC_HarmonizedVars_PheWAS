@@ -6,14 +6,15 @@ import pandas as pd
 
 from env_variables.env_variables import TOKEN,\
     RESOURCE_ID,\
-    PICSURE_NETWORK_URL,\
-    RESULTS_PATH, \
-    batch_size
+    PICSURE_NETWORK_URL
 from python_lib.querying_hpds import get_HPDS_connection,\
     get_whole_dic, \
     get_studies_dictionary, \
     get_batch_groups, \
     query_runner
+
+with open("env_variables/parameters_exp.yaml", "r") as f:
+    parameters_exp = yaml.load(f, Loader=yaml.SafeLoader)
 
 
 resource = get_HPDS_connection(TOKEN, PICSURE_NETWORK_URL, RESOURCE_ID)
@@ -25,7 +26,7 @@ subset_variables_dictionary = variables_dictionary\
     .loc[lambda df: df["harmonized"] == True, :]
 
 subset_variables_dictionary = subset_variables_dictionary.groupby("level_0") \
-    .apply(lambda df: get_batch_groups(df, batch_size, assign=True))
+    .apply(lambda df: get_batch_groups(df, parameters_exp["batch_size"], assign=True))
 
 
 subset_variables_dictionary\
@@ -42,7 +43,7 @@ subset_variables_dictionary[["phs", "batch_group"]].drop_duplicates()\
 
 # Get Harmonized variables types
 renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmonized_variables_manual.csv")\
-    .loc[lambda df: df["renaming_variables"].notnull(), :]\
+    .loc[lambda df: df["renaming_variables"].notnull() & df["kept"], :]\
     .set_index("harmonized_complete_name")
 harmonized_variables_dictionary = variables_dictionary.join(renaming_harmonized_variables_manual,
                           on="name",
@@ -81,23 +82,9 @@ harmonized_variables_dictionary.join(variables_type_df, on="var_name") \
     .pipe(lambda df: df.assign(dependent_var_id=["D" + str(i) for i in range(0, df.shape[0])]))\
     .to_csv("env_variables/df_harmonized_variables.csv", index=False)
 
-parameters = {
-    "univariate": True,
-    "Minimum number observations": 10,
-    "threshold_crosscount": 10,
-    "harmonized_variables_types": "all",
-    "online": True,
-    "save": False,
-    "results_path": RESULTS_PATH,
-    "storage_dropbox": False,
-    "var_name_to_id_df": True
-}
-with open("env_variables/parameters_exp.yaml", "w+") as f:
-    yaml.dump(parameters, f)
     
-
-path_tables = os.path.join(RESULTS_PATH, "tables")
-path_images = os.path.join(RESULTS_PATH, "images")
+path_tables = os.path.join(parameters_exp["results_path"], "tables")
+path_images = os.path.join(parameters_exp["results_path"], "images")
 if not os.path.exists(path_tables):
     os.makedirs(path_tables)
 if not os.path.exists(path_images):

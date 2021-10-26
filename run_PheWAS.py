@@ -222,7 +222,7 @@ class RunPheWAS:
         if not os.path.isdir(results_path):
             os.makedirs(results_path)
         self.write_file(self.descriptive_statistics_df,
-                        file_name=str(self.batch_group) + ".zip",
+                        file_name=str(self.batch_group) + ".csv",
                         dir_path=results_path,
                         map_colnames=self.parameters_exp["var_name_to_id_df"],
                         colnames=["var_name"],
@@ -302,7 +302,7 @@ class RunPheWAS:
         if not os.path.isdir(dir_results):
             os.makedirs(dir_results)
         self.write_file(df_all_results,
-                        file_name=str(self.batch_group) + ".zip",
+                        file_name=str(self.batch_group) + ".csv",
                         dir_path=dir_results,
                         map_colnames=self.parameters_exp["var_name_to_id_df"],
                         colnames=["dependent_var_name", "independent_var_name"],
@@ -313,7 +313,7 @@ class RunPheWAS:
             os.makedirs(dir_logs)
         df_logs_dependent_var = self.logs_to_df(dic_logs_dependent_var)
         self.write_file(df_logs_dependent_var,
-                        file_name=str(self.batch_group) + ".zip",
+                        file_name=str(self.batch_group) + ".csv",
                         dir_path=dir_logs,
                         map_colnames=self.parameters_exp["var_name_to_id_df"],
                         colnames=["dependent_var_name", "independent_var_name"])
@@ -335,7 +335,7 @@ if __name__ == '__main__':
     phs = args.phs
     batch_group = args.batch_group
     time_launched = args.time_launched
-    monitor_file_name = os.path.join(parameters_exp["results_path"], time_launched, "monitor_process.tsv")
+    monitor_file_name = os.path.join(parameters_exp["results_path"], time_launched, "monitor_process.csv")
     
     
     PheWAS = RunPheWAS(TOKEN,
@@ -346,17 +346,51 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    if False:
+    if True:
         # pass
-        PheWAS.dependent_var_names = [
-            "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
-             '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
-             "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
-             "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\",
-             "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\",
-            "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
-            ]
-        PheWAS.independent_var_names = PheWAS.independent_var_names[1:100]
+         PheWAS.dependent_var_names = \
+         ["\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\", 
+          "\\DCC Harmonized data set\\01 - Demographics\\Indicator of Hispanic or Latino ethnicity.\\", 
+          "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\", 
+          "\\DCC Harmonized data set\\01 - Demographics\\classification of Hispanic/Latino background for Hispanic/Latino subjects where country or region of origin information is available\\", 
+          "\\DCC Harmonized data set\\02 - Atherosclerosis\\Common carotid intima-media thickness  calculated as the mean of two values: mean of multiple thickness estimates from the left far wall and from the right far wall.\\", 
+          "\\DCC Harmonized data set\\02 - Atherosclerosis\\Coronary artery calcification (CAC) score using Agatston scoring of CT scan(s) of coronary arteries\\", 
+          "\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\", 
+          "\\DCC Harmonized data set\\02 - Atherosclerosis\\Presence or absence of carotid plaque.\\", 
+          "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\", 
+          "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body mass index calculated at baseline.\\", 
+          "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body weight at baseline.\\", 
+          "\\DCC Harmonized data set\\03 - Baseline common covariates\\Indicates whether subject currently smokes cigarettes.\\", 
+          "\\DCC Harmonized data set\\03 - Baseline common covariates\\Indicates whether subject ever regularly smoked cigarettes.\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Count by volume  or number concentration (ncnc)  of lymphocytes in the blood (bld).\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Count by volume  or number concentration (ncnc)  of neutrophils in the blood (bld).\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Count by volume  or number concentration (ncnc)  of platelets in the blood (bld).\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Count by volume  or number concentration (ncnc)  of red blood cells in the blood (bld).\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Count by volume  or number concentration (ncnc)  of white blood cells in the blood (bld).\\", 
+          "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of hematocrit  the fraction of volume (vfr) of blood (bld) that is composed of red blood cells.\\", 
+          "\\DCC Harmonized data set\\05 - Blood pressure\\Indicator for use of antihypertensive medication at the time of blood pressure measurement.\\", 
+          "\\DCC Harmonized data set\\05 - Blood pressure\\Resting diastolic blood pressure from the upper arm in a clinical setting.\\", 
+          "\\DCC Harmonized data set\\05 - Blood pressure\\Resting systolic blood pressure from the upper arm in a clinical setting.\\", 
+          "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of high-density lipoprotein cholesterol\\", 
+          "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of low-density lipoprotein cholesterol\\", 
+          "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of total cholesterol\\", 
+          "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\", 
+          "\\DCC Harmonized data set\\06 - Lipids\\Indicates whether participant was taking any lipid-lowering medication at blood draw to measure lipids phenotypes\\", 
+          "\\DCC Harmonized data set\\07 - Venous Thromboembolism Event\\An indicator of whether a subject experienced a venous thromboembolism event (VTE) that was verified by adjudication or by medical professionals.\\", 
+          "\\DCC Harmonized data set\\07 - Venous Thromboembolism Event\\An indicator of whether a subject had a venous thromboembolism (VTE) event prior to the start of the medical review process (including self-reported events).\\"
+         ]
+
+        # PheWAS.dependent_var_names =                    [
+        #     "\\DCC Harmonized data set\\03 - Baseline common covariates\\Body height at baseline.\\",
+        #      '\\DCC Harmonized data set\\02 - Atherosclerosis\\Extent of narrowing of the carotid artery.\\',
+        #      "\\DCC Harmonized data set\\01 - Demographics\\Subject sex  as recorded by the study.\\",
+        #      "\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\",
+        #      "\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the ratio of variation in width to the mean width of the red blood cell (rbc) volume distribution curve taken at +/- 1 CV  known as red cell distribution width (RDW).\\",
+        #     "\\DCC Harmonized data set\\06 - Lipids\\Blood mass concentration of triglycerides\\"
+        #     ]
+        
+        
+        PheWAS.independent_var_names = PheWAS.independent_var_names
         # PheWAS.dependent_var_names = ["\\DCC Harmonized data set\\04 - Blood cell count\\Measurement of the mass concentration (mcnc) of hemoglobin in a given volume of packed red blood cells (rbc)  known as mean corpuscular hemoglobin concentration (MCHC).\\"]
         # PheWAS.independent_var_names = ["\\Cardiovascular Health Study (CHS) Cohort: an NHLBI-funded observational study of risk factors for cardiovascular disease in adults 65 years or older ( phs000287 )\\Data contain extensive medical history information of subjects (all > 65 years of age)\\K-channel blockers to enhance insulin se\\"]
         # batch_group=4 phs=phs000287
@@ -376,7 +410,23 @@ if __name__ == '__main__':
         print("association statistics", datetime.now().time().strftime("%H:%M:%S"))
         PheWAS.association_statistics()
     
-    with open(monitor_file_name, "a+") as tsvfile:
-        end_time = datetime.now()
-        writer = csv.writer(tsvfile, delimiter="\t", lineterminator="\n")
-        writer.writerow([phs, str(batch_group), start_time.strftime("%y/%m/%d %H:%M:%S"), end_time.strftime("%y/%m/%d %H:%M:%S"), str(end_time - start_time).split(".")[0]])
+    # Workaround because open(..., "a") not allowed on EC2 (OS Error 95), so reading csv file and appening row manually 
+    end_time = datetime.now()
+    new_row = pd.DataFrame([phs,
+                            str(batch_group),
+                            str(len(PheWAS.independent_var_names)),
+                            str(len(PheWAS.filtered_independent_var_names)),
+                            start_time.strftime("%y/%m/%d %H:%M:%S"),
+                            end_time.strftime("%y/%m/%d %H:%M:%S"),
+                            str(end_time - start_time).split(".")[0]
+                           ]).transpose()
+    if os.path.exists(monitor_file_name):
+        monitor_df = pd.read_csv(monitor_file_name, header=None)
+        monitor_df = monitor_df.append(new_row)
+        monitor_df.to_csv(monitor_file_name, header=False, index=False)
+    else: 
+        new_row.to_csv(monitor_file_name, header=False, index=False)
+#     with open(os.open(monitor_file_name, os.O_CREAT | os.O_WRONLY, 0o777), 'w') as tsvfile:
+#         
+#         writer = csv.writer(tsvfile, delimiter="\t", lineterminator="\n")
+#         writer.writerow([phs, str(batch_group), start_time.strftime("%y/%m/%d %H:%M:%S"), end_time.strftime("%y/%m/%d %H:%M:%S"), str(end_time - start_time).split(".")[0]])

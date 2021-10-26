@@ -1,12 +1,13 @@
 #INPUT=batch_list.txt
 INPUT=env_variables/list_phs_batchgroup.csv
 #CORES=`cat /proc/cpuinfo | grep processor | wc -l`
-CORES=46
+CORES=14
 JOBS=$(ps -df | grep sleping_program.py | wc -l)
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"
 date_start_process=$( date +"%y%m%d_%H%M%S" )
-path_results=/run/user/1000/results_phewas/"$date_start_process"
+# date_start_process=010102_000000
+path_results=results/"$date_start_process"
 if [ ! -d "$path_results" ]
 then
   mkdir -p "$path_results"
