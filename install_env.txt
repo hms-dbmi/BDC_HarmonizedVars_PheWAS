@@ -1,0 +1,7 @@
+conda config --set env_prompt '({name})'
+# conda update -n base -c defaults --yes conda
+conda create --name PheWAS --yes python=3.6 pip
+source activate PheWAS
+pip install -r requirements.txt 
+conda install -c anaconda --yes ipykernel
+python -m ipykernel install --user --name=PheWAS
