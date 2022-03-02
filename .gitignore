@@ -1,0 +1,8 @@
+env_variables/token.txt
+*__pycache__*
+*ipynb_checkpoints*
+results/studies_stats/*
+*.pub
+results/archives/studies_stats/*
+*token*
+

@@ -1,0 +1,11 @@
+Minimum number observations: 15
+harmonized_variables_types: all
+online: true
+results_path: results
+save: false
+storage_dropbox: false
+threshold_crosscount: 10
+univariate: true
+var_name_to_id_df: true
+upstream: false
+batch_size: 500
