@@ -1,7 +1,7 @@
 Minimum number observations: 15
 harmonized_variables_types: all
 online: true
-results_path: results
+results_path: /home/ec2-user/studies/BDC_PheWAS/results_phewas
 save: false
 storage_dropbox: false
 threshold_crosscount: 10
