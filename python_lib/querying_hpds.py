@@ -77,8 +77,12 @@ def get_HPDS_connection(my_token: str = TOKEN,
     if my_token is None:
         with open("env_variables/token.txt", "r") as f:
             my_token = f.read()
+    print(my_token)
+    print(URL_data)
+    print(resource_id)
     client = PicSureClient.Client()
     connection = client.connect(URL_data, my_token)
+    
     if re.search("biodatacatalyst", URL_data) is not None:
         adapter = PicSureBdcAdapter.Adapter(connection)
     else:

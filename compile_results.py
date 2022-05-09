@@ -25,6 +25,10 @@ dict_independent_variables = pd.read_csv("env_variables/df_eligible_variables.cs
 
 # Monitoring_table
 monitoring_table = pd.read_csv(path_monitor, header=None, index_col = None)
+
+if True: 
+    monitoring_table = monitoring_table.sample(15)
+
 monitoring_table_colnames = [
     "phs",
     "batch_group",
@@ -36,7 +40,7 @@ monitoring_table_colnames = [
     "duration"
 ]
 monitoring_table = monitoring_table.set_axis(monitoring_table_colnames, axis=1)\
-                                   .sort_values(["phs", "batch_group"], ascending=True)
+                                   .sort_values(["phs", "batch_group"], ascending=True, ignore_index=True)
 
 
 ## All results 
@@ -55,8 +59,27 @@ for key, (phs, batch_group) in monitoring_table[["phs", "batch_group"]].iterrows
         phs,
         batch_group + ".csv"
     )
-    all_association.append(pd.read_csv(path_association, low_memory=False))
-    all_descriptive.append(pd.read_csv(path_descriptive, low_memory=False))
+    all_association.append(pd.read_csv(path_association, 
+                                       dtype = {
+                                           "dependent_var_id": str, 
+                                           "independent_var_id": str, 
+                                           "value": float, 
+                                           "indicator": str, 
+                                           "dependent_var_modality": str, 
+                                           "independent_var_modality": str, 
+                                           "ref_modality_dependent": str, 
+                                           "ref_modality_independent": str, 
+                                       }
+                                      ))
+    all_descriptive.append(pd.read_csv(path_descriptive, 
+                                       dtype = {
+                                           "modality": str, 
+                                           "value": float, 
+                                           "var_id": str, 
+                                           "var_type": str, 
+                                           "statistic": str
+                                       }
+                                      ))
     all_logs_association.append(pd.read_csv(path_logs_association_statistics))
 
 all_association_table = pd.concat(all_association)
@@ -121,6 +144,8 @@ sign_association_table.loc[lambda df: df["indicator"].isin(["coeff_logR", "coeff
                       .assign(abs_value = lambda df: np.abs(df["value"]))\
                       .sort_values("abs_value", ascending=False)\
                       .head(100)
+
+#TODO: create a visualization from these results 
 
 
 # Getting Flow Chart information 
@@ -218,4 +243,43 @@ subset_association_table.join(subset_log_association.set_index(["dependent_var_i
 step_3_completed = association_table[]
 step_3_succeed = association_table
 logs_association_table.loc[lambda df: (df["dependent_var_id"] == "D39") & (df["independent_var_id"] == "I16555"), :]
-                      
+
+
+# Reading HPDS logs 
+
+
+path_log_hpds = "logs_hpds_query"
+list_phs_batch_group = pd.read_csv("/home/ec2-user/SageMaker/BDC_HarmonizedVars_PheWAS/env_variables/list_phs_batchgroup.csv")
+import json
+import os
+
+list_phs = list_phs_batch_group["phs"].unique()
+dic_logs_hpds = {}
+for phs in list_phs:
+    print(phs)
+    dic_logs_hpds[phs] = {}
+    list_batches = list_phs_batch_group.loc[lambda df: df["phs"] == phs, "batch_group"].values.astype(str).tolist()
+    for batch in list_batches:
+        print(batch)
+        try:
+            with open(os.path.join(path_results, path_log_hpds, phs, batch + ".json"), "r") as f: 
+                log_dict = dic_logs_hpds[batch] = json.load(f)
+            dic_logs_hpds[phs][batch] = log_dict
+        except FileNotFoundError:
+            dic_logs_hpds[phs][batch] = "File not found"
+
+
+df = pd.DataFrame.from_dict({(phs, batch): dic_logs_hpds[phs][batch]
+                            for phs in dic_logs_hpds.keys()
+                            for batch in dic_logs_hpds[phs].keys()},
+                            orient="index")
+
+series = pd.Series({(phs, batch): dic_logs_hpds[phs][batch]
+                            for phs in dic_logs_hpds.keys()
+                            for batch in dic_logs_hpds[phs].keys()})
+
+series.index = pd.MultiIndex.from_tuples(series.index)
+series.reset_index()
+
+
+print(log_hpds[0:2])

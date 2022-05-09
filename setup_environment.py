@@ -38,9 +38,20 @@ subset_variables_dictionary.reset_index("level_0", drop=False)\
     .assign(independent_var_id=["I" + str(i) for i in range(0, subset_variables_dictionary.shape[0])])\
     .to_csv("env_variables/df_eligible_variables.csv", index=False)
 
-subset_variables_dictionary[["phs", "batch_group"]].drop_duplicates()\
-    .to_csv("env_variables/list_phs_batchgroup.csv", index=False)
 
+if parameters_exp["reuse_existing_results"]:
+    existing_results_df = pd.read_csv(os.path.join(parameters_exp["results_path"], parameters_exp["existing_results_timestamp"], "monitor_process.csv"), index_col=False, header=None)\
+    .iloc[:, [0, 1]]\
+    .rename({0: "phs", 1: "batch_group"}, axis=1)
+    subset_variables_dictionary_to_write = subset_variables_dictionary[["phs", "batch_group"]]\
+    .drop_duplicates()\
+    .merge(existing_results_df, how="outer", on = ["phs", "batch_group"], indicator="existing")\
+    .loc[lambda df: df["existing"] == "left_only", ["phs", "batch_group"]]                                                
+else: 
+    subset_variables_dictionary_to_write = subset_variables_dictionary[["phs", "batch_group"]].drop_duplicates()
+
+subset_variables_dictionary_to_write.to_csv("env_variables/list_phs_batchgroup.csv", index=False)
+    
 # Get Harmonized variables types
 renaming_harmonized_variables_manual = pd.read_csv("env_variables/renaming_harmonized_variables_manual.csv")\
     .loc[lambda df: df["renaming_variables"].notnull() & df["kept"], :]\
@@ -83,9 +94,9 @@ harmonized_variables_dictionary.join(variables_type_df, on="var_name") \
     .to_csv("env_variables/df_harmonized_variables.csv", index=False)
 
     
-path_tables = os.path.join(parameters_exp["results_path"], "tables")
-path_images = os.path.join(parameters_exp["results_path"], "images")
-if not os.path.exists(path_tables):
-    os.makedirs(path_tables)
-if not os.path.exists(path_images):
-    os.makedirs(path_images)
+# path_tables = os.path.join(parameters_exp["results_path"], "tables")
+# path_images = os.path.join(parameters_exp["results_path"], "images")
+# if not os.path.exists(path_tables):
+#     os.makedirs(path_tables)
+# if not os.path.exists(path_images):
+#     os.makedirs(path_images)
