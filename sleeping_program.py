@@ -1,7 +1,7 @@
 import time
 
 print("before sleeping")
-time.sleep(3600*24*7)
+time.sleep(3600*1*1)
 print("after sleeping")
 
 start_time = datetime.now()
