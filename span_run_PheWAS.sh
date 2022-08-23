@@ -5,8 +5,8 @@ CORES=12
 JOBS=$(ps -df | grep sleping_program.py | wc -l)
 echo "jobs at the beginning $JOBS"
 echo "cores at the beginning: $CORES"
-date_start_process=$( date +"%y%m%d_%H%M%S" )
-# date_start_process=010102_000000
+# date_start_process=$( date +"%y%m%d_%H%M%S" )
+date_start_process=220426_202807
 path_results=results/"$date_start_process"
 if [ ! -d "$path_results" ]
 then
@@ -36,6 +36,7 @@ n=0
           fi
           python run_PheWAS.py --phs="$phs" --batch_group=$batch_group --time_launched="$date_start_process" > "$path_results"/logs_bash/"$phs"/"$batch_group".txt &
           # python run_PheWAS.py --phs=phs000007 --batch_group=1 --time_launched=010101_00000 >> /run/user/1000/results_phewas/logs_bash.txt &
+          sleep 5
           ((n=n+1))
 #        fi
   done

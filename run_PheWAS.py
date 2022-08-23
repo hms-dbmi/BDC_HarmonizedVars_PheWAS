@@ -346,7 +346,7 @@ if __name__ == '__main__':
                        parameters_exp=parameters_exp,
                        time_launched=time_launched
                        )
-    if True:
+    if False:
         PheWAS.independent_var_names = PheWAS.independent_var_names[0:100]
         PheWAS.dependent_var_names = \
             ["\\DCC Harmonized data set\\01 - Demographics\\Harmonized race category of participant.\\", 
@@ -407,7 +407,7 @@ if __name__ == '__main__':
         print("association statistics", datetime.now().time().strftime("%H:%M:%S"))
         PheWAS.association_statistics()
     
-    # Workaround because open(..., "a") not allowed on EC2 (OS Error 95), so reading csv file and appening row manually 
+    # Workaround because open(..., "a") not allowed on EC2 (OS Error 95), so reading csv file and appending row manually 
     end_time = datetime.now()
     new_row = pd.DataFrame([phs,
                             str(batch_group),
