@@ -21,7 +21,7 @@ ggplot(genoa,
   scale_x_discrete(labels = NULL, breaks = NULL) +
   scale_y_discrete(expand = expansion(0))
 
-if (!dir.exists("results/heatmaps")) dir.create("results/heatmap")
+if (!dir.exists("results/heatmap")) dir.create("results/heatmap")
 
 for (study in unique(continuous_results$Study)) {
   title = study
@@ -42,5 +42,5 @@ for (study in unique(continuous_results$Study)) {
           plot.subtitle = element_text(face = "italic")) +
     theme_bw()
   print(heatmap_association)
-  ggsave(plot = heatmap_association, filename = file.path("results/heatmap", paste0(title, ".png")))
+  ggsave(filename = file.path("results/heatmap", paste0(title, ".png")))
 }

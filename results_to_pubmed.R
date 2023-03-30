@@ -33,7 +33,6 @@ api_key <- "9959092e61737e4f2f804a31fdaba6f46708"
 
 continuous_results <- read_csv("results/dedup_continuous_significant.csv")
 
-head(continuous_results)
 
 ## string treatment
 variable_name_processing <- function(x) {
@@ -65,17 +64,16 @@ list_phs <- table(df_queries$phs_num) %>%
   pull(phs_num) %>%
   as.character()
 
+# TEMP, to rerun last two scenarios
+list_phs <- list_phs[(length(list_phs) - 1) : length(list_phs)]
 
 if (query_w_harmonized) {
   for (phs in list_phs) {
-#TODO: execute that code
     print(phs)
 
-    explanatory_variables <- df_queries$explanatory_variable[df_queries$phs_num == phs] %>%
-      sample(x = ., size = ceiling(length(.)/5))
+    explanatory_variables <- df_queries$explanatory_variable[df_queries$phs_num == phs]
 
-    harmonized_variables <- df_queries$harmonized_variable[df_queries$phs_num == phs] %>%
-      sample(x = ., size = ceiling(length(.)/5))
+    harmonized_variables <- df_queries$harmonized_variable[df_queries$phs_num == phs]
 
     list_queries <- paste0("(",
                            explanatory_variables,
@@ -118,7 +116,7 @@ if (query_w_harmonized) {
     write_csv(pubmed_queries_df, paste0("results/dedup_continuous_pubmed_", phs, ".csv"))
 
     timestamp()
-    print("sleeping")
+    # print("sleeping")
     # Sys.sleep(3600*)
   }
 } else {
@@ -155,7 +153,7 @@ test <- left_join(continuous_results_dm,
 dim(continuous_results_dm)
 
 test %>%
-  distinct() %>%
+  distinct(explanatory_variable, harmonized_variable, Study, .keep_all = TRUE) %>%
   write_csv(file = "results/articles_count_pubmed.csv")
 
 
